@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp *)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -sL \"https://api.github.com/repos/pbakaus/impeccable/contents/.claude/skills/impeccable\")",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f['name'], f['type']\\) for f in data]\")",
+      "Bash(mkdir -p /Users/taylor566/Desktop/sys/.claude/skills)",
+      "Bash(cp -r /tmp/impeccable/.claude/skills/impeccable /Users/taylor566/Desktop/sys/.claude/skills/impeccable)",
+      "Bash(npx impeccable *)",
+      "Bash(npm --version)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(docker --version)",
+      "Bash(uvicorn app.main:app --port 8000)",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@lexiconprep.com\",\"password\":\"test123\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:8000/api/v1/users/me -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzkxOTI3ODMsInN1YiI6ImUzMDk0N2U3LTY5NTYtNDMyMC04MzgwLWI0YWNhMThkODUzOSIsInR5cGUiOiJhY2Nlc3MifQ.YMGX-QM0ReA95jEiaNLzBbsHLcTNIA5XI5Fz5R2Qxeo')",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(f'{len\\(data\\)} questions'\\); [print\\(f'  - {q[\\\\\"content\\\\\"][:40]}...'\\) for q in data[:3]]\")",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@lexiconprep.com\",\"password\":\"test123\"}')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'OK: user={d[\\\\\"user\\\\\"][\\\\\"nickname\\\\\"]}, token={d[\\\\\"access_token\\\\\"][:20]}...'\\)\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3000/)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'{len\\(d\\)} resources found'\\)\")",
+      "Bash(grep -rn --include=\"*.vue\" --include=\"*.ts\" -e \"[A-Za-z]{15,}\" /Users/taylor566/Desktop/sys/src/ --exclude-dir=node_modules)",
+      "Bash(grep -n \"[A-Za-z]\\\\{3,\\\\}\" /Users/taylor566/Desktop/sys/src/views/ExamPage.vue)"
+    ]
+  }
+}

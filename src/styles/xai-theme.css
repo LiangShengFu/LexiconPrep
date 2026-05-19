@@ -1,0 +1,171 @@
+/* ─── x.AI Dark Theme for Element Plus ─── */
+:root {
+  --xai-canvas: #0a0a0a;
+  --xai-canvas-soft: #1a1c20;
+  --xai-canvas-card: #191919;
+  --xai-canvas-mid: #363a3f;
+  --xai-hairline: #212327;
+  --xai-ink: #ffffff;
+  --xai-body: #dadbdf;
+  --xai-mute: #7d8187;
+  --xai-accent-sunset: #ff7a17;
+  --xai-accent-dusk: #7c3aed;
+  --xai-radius-card: 8px;
+  --xai-radius-pill: 9999px;
+}
+
+/* Override Element Plus CSS variables for dark theme */
+:root {
+  --el-color-primary: #ffffff;
+  --el-color-primary-light-3: #dadbdf;
+  --el-color-primary-light-5: #7d8187;
+  --el-color-primary-light-7: #363a3f;
+  --el-color-primary-light-8: #212327;
+  --el-color-primary-light-9: #1a1c20;
+  --el-color-primary-dark-2: #dadbdf;
+
+  --el-bg-color: #0a0a0a;
+  --el-bg-color-overlay: #191919;
+  --el-bg-color-page: #0a0a0a;
+  --el-border-color: #212327;
+  --el-border-color-light: #212327;
+  --el-border-color-lighter: #1a1c20;
+  --el-border-color-extra-light: #1a1c20;
+  --el-text-color-primary: #ffffff;
+  --el-text-color-regular: #dadbdf;
+  --el-text-color-secondary: #7d8187;
+  --el-text-color-placeholder: #7d8187;
+  --el-text-color-disabled: #363a3f;
+  --el-fill-color: #191919;
+  --el-fill-color-light: #1a1c20;
+  --el-fill-color-blank: #0a0a0a;
+  --el-box-shadow: none;
+  --el-box-shadow-light: none;
+  --el-box-shadow-lighter: none;
+  --el-box-shadow-dark: none;
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 9999px;
+}
+
+/* Element Plus component overrides */
+.el-button {
+  --el-button-bg-color: transparent;
+  --el-button-border-color: #212327;
+  --el-button-text-color: #ffffff;
+  --el-button-hover-bg-color: #1a1c20;
+  --el-button-hover-border-color: #363a3f;
+  --el-button-hover-text-color: #ffffff;
+  --el-button-active-bg-color: #191919;
+  --el-button-active-border-color: #ffffff;
+  font-weight: 400;
+  border-radius: 9999px;
+  box-shadow: none !important;
+}
+
+.el-button--primary {
+  --el-button-bg-color: #ffffff;
+  --el-button-border-color: #ffffff;
+  --el-button-text-color: #0a0a0a;
+  --el-button-hover-bg-color: #dadbdf;
+  --el-button-hover-border-color: #dadbdf;
+  --el-button-hover-text-color: #0a0a0a;
+}
+
+.el-card {
+  background-color: #191919;
+  border: 1px solid #212327;
+  border-radius: 8px;
+  box-shadow: none !important;
+}
+
+.el-menu {
+  --el-menu-bg-color: #0a0a0a;
+  --el-menu-text-color: #dadbdf;
+  --el-menu-hover-bg-color: #1a1c20;
+  --el-menu-active-color: #ffffff;
+  --el-menu-border-color: #212327;
+  border-right: 1px solid #212327;
+}
+
+.el-input__wrapper {
+  background-color: #1a1c20;
+  border-color: #212327;
+  box-shadow: none !important;
+  border-radius: 8px;
+}
+
+.el-input__inner {
+  color: #ffffff;
+}
+
+.el-dialog {
+  background-color: #191919;
+  border: 1px solid #212327;
+  border-radius: 8px;
+  box-shadow: none !important;
+}
+
+.el-table {
+  --el-table-bg-color: #0a0a0a;
+  --el-table-tr-bg-color: #0a0a0a;
+  --el-table-header-bg-color: #1a1c20;
+  --el-table-border-color: #212327;
+  --el-table-text-color: #dadbdf;
+  --el-table-header-text-color: #ffffff;
+}
+
+.el-table th.el-table__cell {
+  background-color: #1a1c20;
+  color: #ffffff;
+  font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.el-table td.el-table__cell {
+  border-bottom: 1px solid #212327;
+}
+
+.el-form-item__label {
+  color: #ffffff;
+}
+
+.el-tag {
+  border-radius: 9999px;
+  border: 1px solid #212327;
+  background-color: #1a1c20;
+  color: #dadbdf;
+}
+
+.el-pagination {
+  --el-pagination-bg-color: #0a0a0a;
+  --el-pagination-text-color: #dadbdf;
+  --el-pagination-button-bg-color: #191919;
+  --el-pagination-button-disabled-bg-color: #0a0a0a;
+  --el-pagination-hover-color: #ffffff;
+}
+
+.el-popper.is-dark {
+  background-color: #191919;
+  border: 1px solid #212327;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #363a3f;
+  border-radius: 3px;
+}
+
+/* Global reset for xAI aesthetic */
+button, a {
+  font-weight: 400;
+}
