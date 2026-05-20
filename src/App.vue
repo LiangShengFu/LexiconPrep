@@ -6,6 +6,7 @@ import NavBar from '@/components/NavBar.vue'
 import AppShell from '@/components/AppShell.vue'
 import AdminShell from '@/components/AdminShell.vue'
 import ErrorBoundary from '@/components/ErrorBoundary.vue'
+import TargetCursor from '@/components/TargetCursor.vue'
 import ToastContainer from '@/components/ToastContainer.vue'
 
 const auth = useAuthStore()
@@ -28,5 +29,6 @@ const isAdminPage = computed(() => route.path.startsWith('/admin'))
   <div v-if="isMarketingPage">
     <ErrorBoundary><router-view /></ErrorBoundary>
   </div>
+  <TargetCursor :spin-duration="2" :hide-default-cursor="true" />
   <ToastContainer />
 </template>

@@ -83,7 +83,7 @@ const handleRegister = async () => {
           />
         </div>
         <button
-          class="btn-pill-filled w-full text-base py-3"
+          class="btn-pill-filled cursor-target w-full text-base py-3"
           :disabled="auth.loading"
           @click="handleRegister"
         >

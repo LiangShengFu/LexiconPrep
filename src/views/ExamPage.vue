@@ -106,7 +106,7 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
             <button
               v-for="s in subjects"
               :key="s"
-              class="btn-pill-outline text-sm px-8"
+              class="btn-pill-outline cursor-target text-sm px-8"
               :class="{ 'border-ink bg-canvas-soft': selectedSubject === s }"
               @click="selectedSubject = s"
             >
@@ -116,7 +116,7 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
         </div>
 
         <div v-if="error" class="text-red-400 text-sm mb-4">{{ error }}</div>
-        <button class="btn-pill-filled text-base px-10 py-3" :disabled="loading" @click="startExam">
+        <button class="btn-pill-filled cursor-target text-base px-10 py-3" :disabled="loading" @click="startExam">
           {{ loading ? '加载中...' : '开始做题' }}
         </button>
       </div>
@@ -132,7 +132,7 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
         <div class="flex items-center gap-4">
           <span class="text-mute text-sm">已答 {{ answeredCount }} / {{ totalQuestions }} 题</span>
           <span class="text-ink font-mono text-lg">{{ formatTime(timeElapsed) }}</span>
-          <button class="btn-pill-filled text-sm" @click="finishExam">提交</button>
+          <button class="btn-pill-filled cursor-target text-sm" @click="finishExam">提交</button>
         </div>
       </div>
 
@@ -170,10 +170,10 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
           </div>
 
           <div class="flex items-center justify-between mt-8 pt-4 border-t border-hairline">
-            <button class="btn-pill-outline text-sm" :disabled="currentIndex === 0" @click="prevQuestion">上一题</button>
+            <button class="btn-pill-outline cursor-target text-sm" :disabled="currentIndex === 0" @click="prevQuestion">上一题</button>
             <button
               v-if="currentIndex < totalQuestions - 1"
-              class="btn-pill-filled text-sm"
+              class="btn-pill-filled cursor-target text-sm"
               @click="nextQuestion"
             >
               下一题
@@ -217,8 +217,8 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
         </p>
         <p class="text-mute text-sm mb-6">用时: {{ formatTime(timeElapsed) }}</p>
         <div class="flex items-center justify-center gap-3">
-          <button class="btn-pill-outline text-sm" @click="retry">重新选题</button>
-          <button class="btn-pill-filled text-sm" @click="phase = 'exam'; currentIndex = 0">查看答题</button>
+          <button class="btn-pill-outline cursor-target text-sm" @click="retry">重新选题</button>
+          <button class="btn-pill-filled cursor-target text-sm" @click="phase = 'exam'; currentIndex = 0">查看答题</button>
         </div>
       </div>
     </div>

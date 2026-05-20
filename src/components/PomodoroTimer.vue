@@ -120,9 +120,9 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
     </div>
 
     <div class="flex items-center justify-center gap-2">
-      <button v-if="!running" class="btn-pill-filled text-xs px-4 py-1.5" @click="start">开始</button>
-      <button v-else class="btn-pill-outline text-xs px-4 py-1.5" @click="pause">暂停</button>
-      <button class="btn-pill-outline text-xs px-3 py-1.5" @click="reset">重置</button>
+      <button v-if="!running" class="btn-pill-filled cursor-target text-xs px-4 py-1.5" @click="start">开始</button>
+      <button v-else class="btn-pill-outline cursor-target text-xs px-4 py-1.5" @click="pause">暂停</button>
+      <button class="btn-pill-outline cursor-target text-xs px-3 py-1.5" @click="reset">重置</button>
     </div>
   </div>
 
@@ -153,12 +153,12 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
     </div>
 
     <div class="flex items-center gap-4 mt-10">
-      <button v-if="!running" class="btn-pill-filled text-lg px-10 py-4" @click="start">开始</button>
-      <button v-else class="btn-pill-outline text-lg px-10 py-4" @click="pause">暂停</button>
-      <button class="btn-pill-outline text-lg px-8 py-4" @click="reset">重置</button>
+      <button v-if="!running" class="btn-pill-filled cursor-target text-lg px-10 py-4" @click="start">开始</button>
+      <button v-else class="btn-pill-outline cursor-target text-lg px-10 py-4" @click="pause">暂停</button>
+      <button class="btn-pill-outline cursor-target text-lg px-8 py-4" @click="reset">重置</button>
     </div>
 
-    <button class="btn-pill-outline text-sm mt-8" @click="switchMode">
+    <button class="btn-pill-outline cursor-target text-sm mt-8" @click="switchMode">
       切换到{{ isWork ? '休息' : '专注' }}
     </button>
   </div>

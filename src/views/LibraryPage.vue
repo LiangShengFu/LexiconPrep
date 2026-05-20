@@ -105,7 +105,7 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
         <p class="text-mute text-sm">未找到匹配的资源。</p>
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="r in resources" :key="r.id" class="card-xai flex flex-col gap-3 group hover:border-canvas-mid transition-colors">
+        <div v-for="r in resources" :key="r.id" class="card-xai flex flex-col gap-3 group cursor-target hover:border-canvas-mid transition-colors">
           <div class="flex items-start justify-between">
             <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ r.type }}</span>
             <span class="text-mute text-xs">{{ r.year }}</span>
@@ -128,7 +128,7 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
         <p class="text-mute text-xs">做题时答错的题目会自动加入这里。</p>
       </div>
       <div v-else class="space-y-3">
-        <div v-for="m in mistakes" :key="m.id" class="card-xai flex items-start justify-between gap-4 group">
+        <div v-for="m in mistakes" :key="m.id" class="card-xai flex items-start justify-between gap-4 group cursor-target">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1">
               <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ m.question_subject }}</span>

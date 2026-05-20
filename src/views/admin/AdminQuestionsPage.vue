@@ -68,7 +68,7 @@ const deleteQuestion = async (id: string) => {
         <p class="eyebrow-mono-sm mb-2">管理</p>
         <h1 class="text-display-sm text-ink">题目管理</h1>
       </div>
-      <button class="btn-pill-filled text-sm" @click="openCreate">添加题目</button>
+      <button class="btn-pill-filled cursor-target text-sm" @click="openCreate">添加题目</button>
     </div>
 
     <div class="flex gap-3">
@@ -93,8 +93,8 @@ const deleteQuestion = async (id: string) => {
           <p class="text-body text-sm truncate">{{ q.content }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <button class="btn-pill-outline text-xs" @click="openEdit(q)">编辑</button>
-          <button class="btn-pill-outline text-xs border-red-500/30 text-red-400 hover:border-red-500" @click="deleteQuestion(q.id)">删除</button>
+          <button class="btn-pill-outline cursor-target text-xs" @click="openEdit(q)">编辑</button>
+          <button class="btn-pill-outline cursor-target text-xs border-red-500/30 text-red-400 hover:border-red-500" @click="deleteQuestion(q.id)">删除</button>
         </div>
       </div>
     </div>
@@ -150,8 +150,8 @@ const deleteQuestion = async (id: string) => {
           <textarea v-model="form.analysis" rows="2" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div class="flex gap-3 pt-2">
-          <button class="btn-pill-outline flex-1 text-sm" @click="showEdit = false">取消</button>
-          <button class="btn-pill-filled flex-1 text-sm" :disabled="saving" @click="save">{{ saving ? '保存中...' : '保存' }}</button>
+          <button class="btn-pill-outline cursor-target flex-1 text-sm" @click="showEdit = false">取消</button>
+          <button class="btn-pill-filled cursor-target flex-1 text-sm" :disabled="saving" @click="save">{{ saving ? '保存中...' : '保存' }}</button>
         </div>
       </div>
     </div>

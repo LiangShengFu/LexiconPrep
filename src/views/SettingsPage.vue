@@ -75,7 +75,7 @@ const saveProfile = async () => {
           />
           <p class="text-mute text-xs mt-1">邮箱暂不支持修改</p>
         </div>
-        <button class="btn-pill-filled text-sm px-6 py-2.5" :disabled="saving" @click="saveProfile">
+        <button class="btn-pill-filled cursor-target text-sm px-6 py-2.5" :disabled="saving" @click="saveProfile">
           {{ saving ? '保存中...' : '保存个人信息' }}
         </button>
       </div>

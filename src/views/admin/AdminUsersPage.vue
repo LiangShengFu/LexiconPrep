@@ -42,7 +42,7 @@ const toggleRole = async (user: User) => {
             :class="u.role === 'admin' ? 'border-accent-sunset/30 text-accent-sunset' : 'border-hairline text-mute'">
             {{ u.role === 'admin' ? '管理员' : '用户' }}
           </span>
-          <button class="btn-pill-outline text-xs" @click="toggleRole(u)">切换角色</button>
+          <button class="btn-pill-outline cursor-target text-xs" @click="toggleRole(u)">切换角色</button>
         </div>
       </div>
       <div v-if="!users.length" class="card-xai text-center py-8 text-mute text-sm">暂无用户</div>

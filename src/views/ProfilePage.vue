@@ -167,7 +167,7 @@ const changePassword = async () => {
           <label class="block text-body text-sm mb-2">邮箱</label>
           <input :value="email" type="email" disabled class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-mute text-sm opacity-60 cursor-not-allowed" />
         </div>
-        <button class="btn-pill-filled text-sm px-6 py-2.5" :disabled="profileSaving" @click="saveProfile">{{ profileSaving ? '保存中...' : '保存' }}</button>
+        <button class="btn-pill-filled cursor-target text-sm px-6 py-2.5" :disabled="profileSaving" @click="saveProfile">{{ profileSaving ? '保存中...' : '保存' }}</button>
       </div>
 
       <!-- Password change -->
@@ -185,7 +185,7 @@ const changePassword = async () => {
           <label class="block text-body text-sm mb-2">确认新密码</label>
           <input v-model="confirmPassword" type="password" placeholder="再次输入新密码" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
-        <button class="btn-pill-filled text-sm px-6 py-2.5" :disabled="passwordSaving" @click="changePassword">{{ passwordSaving ? '修改中...' : '修改密码' }}</button>
+        <button class="btn-pill-filled cursor-target text-sm px-6 py-2.5" :disabled="passwordSaving" @click="changePassword">{{ passwordSaving ? '修改中...' : '修改密码' }}</button>
       </div>
     </div>
   </div>

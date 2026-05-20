@@ -69,7 +69,7 @@ const timeAgo = (dateStr: string) => {
               class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink resize-none" />
             <div class="flex items-center justify-between">
               <input v-model="newSubject" placeholder="标签（如：考研经验）" class="bg-canvas-soft border border-hairline rounded-card px-3 py-1.5 text-ink text-xs placeholder:text-mute focus:outline-none focus:border-ink w-40" />
-              <button class="btn-pill-filled text-sm" :disabled="posting || !newContent.trim()" @click="createPost">
+              <button class="btn-pill-filled cursor-target text-sm" :disabled="posting || !newContent.trim()" @click="createPost">
                 {{ posting ? '发布中...' : '发布' }}
               </button>
             </div>

@@ -32,8 +32,8 @@ const isActive = (path: string) => route.path === path
         </button>
       </nav>
       <div class="p-3 border-t border-hairline space-y-2">
-        <button class="btn-pill-outline text-sm w-full" @click="router.push('/profile')">返回前台</button>
-        <button class="btn-pill-outline text-sm w-full" @click="router.push('/')">退出</button>
+        <button class="btn-pill-outline cursor-target text-sm w-full" @click="router.push('/profile')">返回前台</button>
+        <button class="btn-pill-outline cursor-target text-sm w-full" @click="router.push('/')">退出</button>
       </div>
     </aside>
     <main class="flex-1 overflow-auto">

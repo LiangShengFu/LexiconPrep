@@ -62,7 +62,7 @@ const isActive = (path: string) => route.path === path
 
       <div class="p-3 border-t border-hairline">
         <button
-          class="btn-pill-outline text-sm w-full"
+          class="btn-pill-outline cursor-target text-sm w-full"
           @click="router.push('/')"
         >
           退出登录

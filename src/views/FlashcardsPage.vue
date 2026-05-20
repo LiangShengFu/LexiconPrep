@@ -85,10 +85,10 @@ const deleteCard = async (id: string) => {
 
     <div class="flex flex-wrap items-center gap-2 justify-between">
       <div class="flex flex-wrap gap-2">
-        <button class="btn-pill-outline text-xs" :class="{ 'border-ink bg-canvas-soft': filterSubject === 'all' }" @click="filterSubject = 'all'">全部</button>
-        <button v-for="s in subjects" :key="s" class="btn-pill-outline text-xs" :class="{ 'border-ink bg-canvas-soft': filterSubject === s }" @click="filterSubject = s">{{ s }}</button>
+        <button class="btn-pill-outline cursor-target text-xs" :class="{ 'border-ink bg-canvas-soft': filterSubject === 'all' }" @click="filterSubject = 'all'">全部</button>
+        <button v-for="s in subjects" :key="s" class="btn-pill-outline cursor-target text-xs" :class="{ 'border-ink bg-canvas-soft': filterSubject === s }" @click="filterSubject = s">{{ s }}</button>
       </div>
-      <button class="btn-pill-filled text-sm" @click="showCreate = true">创建闪卡</button>
+      <button class="btn-pill-filled cursor-target text-sm" @click="showCreate = true">创建闪卡</button>
     </div>
 
     <!-- Card -->
@@ -108,20 +108,20 @@ const deleteCard = async (id: string) => {
       </div>
 
       <div class="flex items-center gap-4 mt-6">
-        <button class="btn-pill-outline text-sm" @click="prevCard">上一张</button>
+        <button class="btn-pill-outline cursor-target text-sm" @click="prevCard">上一张</button>
         <span class="text-mute text-sm">{{ currentIndex + 1 }} / {{ filteredCards.length }}</span>
-        <button class="btn-pill-outline text-sm" @click="nextCard">下一张</button>
+        <button class="btn-pill-outline cursor-target text-sm" @click="nextCard">下一张</button>
       </div>
 
       <div class="flex items-center gap-3 mt-4">
-        <button class="btn-pill-outline text-sm border-red-500/30 text-red-400 hover:border-red-500" @click="reviewCard(false)">再复习</button>
-        <button class="btn-pill-filled text-sm" @click="reviewCard(true)">记住了</button>
+        <button class="btn-pill-outline cursor-target text-sm border-red-500/30 text-red-400 hover:border-red-500" @click="reviewCard(false)">再复习</button>
+        <button class="btn-pill-filled cursor-target text-sm" @click="reviewCard(true)">记住了</button>
       </div>
     </div>
 
     <div v-else-if="!loading" class="card-xai text-center py-12">
       <p class="text-mute text-sm">暂无闪卡，开始创建吧！</p>
-      <button class="btn-pill-filled mt-4 text-sm" @click="showCreate = true">创建闪卡</button>
+      <button class="btn-pill-filled cursor-target mt-4 text-sm" @click="showCreate = true">创建闪卡</button>
     </div>
 
     <!-- Create Modal -->
@@ -141,8 +141,8 @@ const deleteCard = async (id: string) => {
           <input v-model="newSubject" type="text" placeholder="如：政治" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div class="flex gap-3 pt-2">
-          <button class="btn-pill-outline flex-1 text-sm" @click="showCreate = false">取消</button>
-          <button class="btn-pill-filled flex-1 text-sm" :disabled="creating" @click="createCard">{{ creating ? '创建中...' : '创建' }}</button>
+          <button class="btn-pill-outline cursor-target flex-1 text-sm" @click="showCreate = false">取消</button>
+          <button class="btn-pill-filled cursor-target flex-1 text-sm" :disabled="creating" @click="createCard">{{ creating ? '创建中...' : '创建' }}</button>
         </div>
       </div>
     </div>

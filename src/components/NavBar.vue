@@ -42,12 +42,12 @@ const logout = () => {
       </nav>
 
       <div v-if="loggedIn" class="flex items-center gap-3">
-        <button class="btn-pill-outline text-sm" @click="goTo('/profile')">个人主页</button>
-        <button class="btn-pill-outline text-sm" @click="logout">退出</button>
+        <button class="btn-pill-outline cursor-target text-sm" @click="goTo('/profile')">个人主页</button>
+        <button class="btn-pill-outline cursor-target text-sm" @click="logout">退出</button>
       </div>
       <div v-else class="flex items-center gap-3">
-        <button class="btn-pill-outline text-sm" @click="goTo('/login')">登录</button>
-        <button class="btn-pill-filled text-sm" @click="goTo('/register')">注册</button>
+        <button class="btn-pill-outline cursor-target text-sm" @click="goTo('/login')">登录</button>
+        <button class="btn-pill-filled cursor-target text-sm" @click="goTo('/register')">注册</button>
       </div>
     </div>
   </header>

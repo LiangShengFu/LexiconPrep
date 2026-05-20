@@ -158,13 +158,13 @@ onMounted(loadData)
           </div>
         </div>
         <div v-else class="text-mute text-sm py-4 text-center">还没有错题，去做几道题吧</div>
-        <button class="btn-pill-outline mt-4 text-sm" @click="$router.push('/library')">查看错题本</button>
+        <button class="btn-pill-outline cursor-target mt-4 text-sm" @click="$router.push('/library')">查看错题本</button>
       </div>
 
       <div class="card-xai">
         <p class="eyebrow-mono-sm text-mute mb-4">快捷入口</p>
         <div v-if="recentResources.length" class="space-y-2">
-          <button v-for="r in recentResources" :key="r.id" class="btn-pill-outline w-full text-sm justify-start truncate">{{ r.title }}</button>
+          <button v-for="r in recentResources" :key="r.id" class="btn-pill-outline cursor-target w-full text-sm justify-start truncate">{{ r.title }}</button>
         </div>
         <div v-else class="text-mute text-sm py-4 text-center">暂无资源</div>
       </div>
