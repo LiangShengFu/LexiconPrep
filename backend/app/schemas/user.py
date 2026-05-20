@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
@@ -14,10 +15,23 @@ class UserLogin(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: str
+    id: uuid.UUID
     email: str
     nickname: str
     avatar: str | None = None
+    role: str = "user"
+    streak_days: int
+    total_knowledge_points: int
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class UserListResponse(BaseModel):
+    id: uuid.UUID
+    email: str
+    nickname: str
+    role: str
     streak_days: int
     total_knowledge_points: int
     created_at: datetime
@@ -34,3 +48,13 @@ class TokenResponse(BaseModel):
 class UserUpdate(BaseModel):
     nickname: str | None = None
     avatar: str | None = None
+
+
+class UserRoleUpdate(BaseModel):
+    role: str
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+

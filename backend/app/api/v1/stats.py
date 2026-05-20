@@ -1,9 +1,13 @@
+"""Stats endpoints — all data queried from the database, no hardcoded values."""
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.core.database import get_db
 from app.models.user import User
+from app.models.study_log import StudyLog
+from app.models.question import Question
 from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/stats", tags=["stats"])
@@ -14,70 +18,89 @@ async def get_overview(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Return KPI data for the current user."""
+    # Total questions answered
+    total_result = await db.execute(
+        select(func.count(StudyLog.id)).where(StudyLog.user_id == current_user.id)
+    )
+    total_answered = total_result.scalar() or 0
+
+    # Accuracy
+    correct_result = await db.execute(
+        select(func.count(StudyLog.id))
+        .where(StudyLog.user_id == current_user.id, StudyLog.is_correct == True)
+    )
+    correct_count = correct_result.scalar() or 0
+
+    # Focus minutes (sum of time_spent)
+    time_result = await db.execute(
+        select(func.coalesce(func.sum(StudyLog.time_spent), 0))
+        .where(StudyLog.user_id == current_user.id)
+    )
+    total_seconds = time_result.scalar() or 0
+
     return {
         "streak_days": current_user.streak_days,
         "total_knowledge_points": current_user.total_knowledge_points,
-        "total_questions_answered": 0,
-        "average_accuracy": 0.0,
-        "total_study_minutes": 0,
+        "total_questions_answered": total_answered,
+        "average_accuracy": round(correct_count / total_answered * 100, 1) if total_answered > 0 else 0.0,
+        "total_study_minutes": total_seconds // 60,
     }
 
 
 @router.get("/progress")
 async def get_progress(
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    return {
-        "weekly": [
-            {"week": "第1周", "questions": 24},
-            {"week": "第2周", "questions": 30},
-            {"week": "第3周", "questions": 28},
-            {"week": "第4周", "questions": 42},
-            {"week": "第5周", "questions": 45},
-            {"week": "第6周", "questions": 38},
-            {"week": "第7周", "questions": 52},
-            {"week": "第8周", "questions": 48},
-            {"week": "第9周", "questions": 55},
-            {"week": "第10周", "questions": 62},
-        ],
-        "subjects": {
-            "政治": 180,
-            "英语": 220,
-            "数学": 140,
-            "专业课一": 160,
-            "专业课二": 120,
-        },
-    }
+    # Last 10 weeks of question counts
+    weekly = []
+    for week_offset in range(9, -1, -1):
+        start = datetime.utcnow() - timedelta(days=7 * (week_offset + 1))
+        end = datetime.utcnow() - timedelta(days=7 * week_offset)
+        result = await db.execute(
+            select(func.count(StudyLog.id)).where(
+                StudyLog.user_id == current_user.id,
+                StudyLog.timestamp >= start,
+                StudyLog.timestamp < end,
+            )
+        )
+        weekly.append({"week": f"第{10 - week_offset}周", "questions": result.scalar() or 0})
 
+    # Subject distribution (last 30 days)
+    cutoff = datetime.utcnow() - timedelta(days=30)
+    subject_result = await db.execute(
+        select(Question.subject, func.count(StudyLog.id))
+        .join(Question, StudyLog.question_id == Question.id)
+        .where(StudyLog.user_id == current_user.id, StudyLog.timestamp >= cutoff)
+        .group_by(Question.subject)
+    )
+    subjects = {row[0]: row[1] for row in subject_result.all()}
+    if not subjects:
+        subjects = {"暂无数据": 1}
 
-@router.get("/community")
-async def get_community():
-    return {
-        "posts": [
-            {"id": "1", "user": "陈林", "avatar": "CL", "subject": "计算机科学", "content": "刚刚达成 60 天连续打卡！悬浮番茄钟真的改变了我的学习节奏。", "time": "2 小时前", "likes": 24},
-            {"id": "2", "user": "张悦", "avatar": "ZY", "subject": "法学硕士", "content": "有谁有民法部分的好的复习资料吗？案例分析题太密了。", "time": "5 小时前", "likes": 18},
-            {"id": "3", "user": "刘伟", "avatar": "LW", "subject": "心理学专硕", "content": "完成了第一次模拟考试，正确率 78%。还有提升空间但感觉还不错。", "time": "8 小时前", "likes": 31},
-            {"id": "4", "user": "王静", "avatar": "WJ", "subject": "英语", "content": "分享我的词汇闪卡集——5500 词带例句，希望对大家有帮助。", "time": "1 天前", "likes": 47},
-        ],
-        "groups": [
-            {"name": "计算机学习组", "online": 12},
-            {"name": "法学复习圈", "online": 8},
-            {"name": "英语角", "online": 21},
-        ],
-        "leaderboard": [
-            {"name": "小明", "hours": 62},
-            {"name": "杨柳", "hours": 58},
-            {"name": "赵文", "hours": 51},
-        ],
-    }
+    return {"weekly": weekly, "subjects": subjects}
 
 
 @router.get("/trend")
 async def get_trend(
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    return {
-        "labels": ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
-        "values": [28, 35, 42, 30, 48, 55, 42],
-    }
+    day_labels = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+    values = []
+
+    for day_offset in range(6, -1, -1):
+        day = datetime.utcnow() - timedelta(days=day_offset)
+        start = day.replace(hour=0, minute=0, second=0)
+        end = day.replace(hour=23, minute=59, second=59)
+        result = await db.execute(
+            select(func.count(StudyLog.id)).where(
+                StudyLog.user_id == current_user.id,
+                StudyLog.timestamp >= start,
+                StudyLog.timestamp <= end,
+            )
+        )
+        values.append(result.scalar() or 0)
+
+    return {"labels": day_labels, "values": values}
+

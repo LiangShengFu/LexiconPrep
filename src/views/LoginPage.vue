@@ -9,13 +9,32 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 
+const parseError = (e: any): string => {
+  const detail = e.response?.data?.detail
+  if (!detail) return '登录失败，请稍后重试'
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const msgs = detail.map((d: any) => d.msg || '').filter(Boolean)
+    return msgs.join('；') || '输入格式有误'
+  }
+  return '登录失败，请稍后重试'
+}
+
 const handleLogin = async () => {
   error.value = ''
+  if (!email.value.includes('@')) {
+    error.value = '请输入有效的邮箱地址'
+    return
+  }
+  if (!password.value) {
+    error.value = '请输入密码'
+    return
+  }
   try {
     await auth.login(email.value, password.value)
-    router.push('/dashboard')
+    router.push('/profile')
   } catch (e: any) {
-    error.value = e.response?.data?.detail || '登录失败，请检查邮箱和密码'
+    error.value = parseError(e)
   }
 }
 </script>
@@ -61,14 +80,10 @@ const handleLogin = async () => {
 
       <p class="text-mute text-sm text-center mt-6">
         还没有账号？
-        <button class="text-ink hover:text-body transition-colors" @click="router.push('/register')">
-          立即注册
-        </button>
+        <button class="text-ink hover:text-body transition-colors" @click="router.push('/register')">立即注册</button>
       </p>
 
-      <p class="text-mute text-xs text-center mt-4">
-        测试账号: test@lexiconprep.com / test123
-      </p>
+      <p class="text-mute text-xs text-center mt-4">测试账号: test@lexiconprep.com / test123</p>
     </div>
   </div>
 </template>

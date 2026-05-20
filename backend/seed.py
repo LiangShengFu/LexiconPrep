@@ -6,6 +6,7 @@ from app.core.security import hash_password
 from app.models.user import User
 from app.models.question import Question
 from app.models.resource import Resource
+from app.models.community import CommunityPost
 
 
 QUESTIONS = [
@@ -78,6 +79,15 @@ async def seed():
             db.add(user)
             print("Created test user: test@lexiconprep.com / test123")
 
+            admin = User(
+                email="admin@lexiconprep.com",
+                password_hash=hash_password("admin123"),
+                nickname="管理员",
+                role="admin",
+            )
+            db.add(admin)
+            print("Created admin user: admin@lexiconprep.com / admin123")
+
         # Create questions
         result = await db.execute(select(Question))
         if result.first():
@@ -95,6 +105,24 @@ async def seed():
             for r in RESOURCES:
                 db.add(Resource(**r))
             print(f"Created {len(RESOURCES)} resources.")
+
+        # Seed community posts from test user
+        result = await db.execute(select(CommunityPost))
+        if result.first():
+            print("Community posts already exist, skipping.")
+        else:
+            # Get the test user
+            result = await db.execute(select(User).where(User.email == "test@lexiconprep.com"))
+            test_user = result.scalar_one()
+            posts = [
+                CommunityPost(user_id=test_user.id, content="刚刚达成 60 天连续打卡！悬浮番茄钟真的改变了我的学习节奏。", subject="考研经验"),
+                CommunityPost(user_id=test_user.id, content="有谁有民法部分的好的复习资料吗？案例分析题太密了。", subject="法学"),
+                CommunityPost(user_id=test_user.id, content="完成了第一次模拟考试，正确率 78%。还有提升空间但感觉还不错。", subject="考研经验"),
+                CommunityPost(user_id=test_user.id, content="分享我的词汇闪卡集——5500 词带例句，希望对大家有帮助。", subject="英语"),
+            ]
+            for p in posts:
+                db.add(p)
+            print(f"Created {len(posts)} community posts.")
 
         await db.commit()
         print("Seed complete.")

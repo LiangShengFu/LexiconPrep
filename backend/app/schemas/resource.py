@@ -1,9 +1,10 @@
+import uuid
 from datetime import datetime
 from pydantic import BaseModel
 
 
 class ResourceResponse(BaseModel):
-    id: str
+    id: uuid.UUID
     title: str
     description: str | None
     type: str

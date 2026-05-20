@@ -3,78 +3,40 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: '/',
-      name: 'landing',
-      component: () => import('@/views/LandingPage.vue'),
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginPage.vue'),
-      meta: { guest: true },
-    },
-    {
-      path: '/register',
-      name: 'register',
-      component: () => import('@/views/RegisterPage.vue'),
-      meta: { guest: true },
-    },
-    {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/library',
-      name: 'library',
-      component: () => import('@/views/LibraryPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/exam',
-      name: 'exam',
-      component: () => import('@/views/ExamPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/flashcards',
-      name: 'flashcards',
-      component: () => import('@/views/FlashcardsPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/progress',
-      name: 'progress',
-      component: () => import('@/views/ProgressPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/community',
-      name: 'community',
-      component: () => import('@/views/CommunityPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      component: () => import('@/views/SettingsPage.vue'),
-      meta: { requiresAuth: true },
-    },
+    { path: '/', name: 'landing', component: () => import('@/views/LandingPage.vue') },
+    { path: '/login', name: 'login', component: () => import('@/views/LoginPage.vue') },
+    { path: '/register', name: 'register', component: () => import('@/views/RegisterPage.vue') },
+    { path: '/dashboard', redirect: '/profile' },
+    { path: '/settings', redirect: '/profile' },
+    { path: '/profile', name: 'profile', component: () => import('@/views/ProfilePage.vue'), meta: { requiresAuth: true } },
+    { path: '/library', name: 'library', component: () => import('@/views/LibraryPage.vue'), meta: { requiresAuth: true } },
+    { path: '/exam', name: 'exam', component: () => import('@/views/ExamPage.vue'), meta: { requiresAuth: true } },
+    { path: '/flashcards', name: 'flashcards', component: () => import('@/views/FlashcardsPage.vue'), meta: { requiresAuth: true } },
+    { path: '/progress', name: 'progress', component: () => import('@/views/ProgressPage.vue'), meta: { requiresAuth: true } },
+    { path: '/community', name: 'community', component: () => import('@/views/CommunityPage.vue'), meta: { requiresAuth: true } },
+    { path: '/admin', name: 'adminOverview', component: () => import('@/views/admin/AdminOverviewPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+    { path: '/admin/questions', name: 'adminQuestions', component: () => import('@/views/admin/AdminQuestionsPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+    { path: '/admin/users', name: 'adminUsers', component: () => import('@/views/admin/AdminUsersPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   ],
 })
 
-router.beforeEach((to, _from) => {
+router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('access_token')
 
   if (to.meta.requiresAuth && !token) {
-    return '/login'
+    next('/login')
+    return
   }
 
-  if (to.meta.guest && token) {
-    return '/dashboard'
+  if (to.meta.requiresAdmin) {
+    const userStr = localStorage.getItem('user')
+    if (!userStr) { next('/profile'); return }
+    try {
+      if (JSON.parse(userStr).role !== 'admin') { next('/profile'); return }
+    } catch { next('/profile'); return }
   }
+
+  next()
 })
 
 export default router

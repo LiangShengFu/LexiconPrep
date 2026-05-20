@@ -75,7 +75,7 @@ onMounted(async () => {
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { color: '#dadbdf', font: { size: 12, family: 'Inter' }, padding: 16 },
+              labels: { color: '#dadbdf', font: { size: 12, family: 'Courier Prime' }, padding: 16 },
             },
           },
         },

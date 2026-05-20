@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -16,8 +17,8 @@ class FlashcardUpdate(BaseModel):
 
 
 class FlashcardResponse(BaseModel):
-    id: str
-    user_id: str
+    id: uuid.UUID
+    user_id: uuid.UUID
     front: str
     back: str
     subject: str | None = None

@@ -10,10 +10,25 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 
+const parseError = (e: any): string => {
+  const detail = e.response?.data?.detail
+  if (!detail) return '注册失败，请稍后重试'
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const msgs = detail.map((d: any) => d.msg || '').filter(Boolean)
+    return msgs.join('；') || '输入格式有误'
+  }
+  return '注册失败，请稍后重试'
+}
+
 const handleRegister = async () => {
   error.value = ''
-  if (!nickname.value || !email.value || !password.value) {
-    error.value = '请填写所有字段'
+  if (!nickname.value.trim()) {
+    error.value = '请输入昵称'
+    return
+  }
+  if (!email.value.includes('@')) {
+    error.value = '请输入有效的邮箱地址'
     return
   }
   if (password.value.length < 6) {
@@ -22,9 +37,9 @@ const handleRegister = async () => {
   }
   try {
     await auth.register(email.value, password.value, nickname.value)
-    router.push('/dashboard')
+    router.push('/profile')
   } catch (e: any) {
-    error.value = e.response?.data?.detail || '注册失败，请稍后重试'
+    error.value = parseError(e)
   }
 }
 </script>
@@ -78,9 +93,7 @@ const handleRegister = async () => {
 
       <p class="text-mute text-sm text-center mt-6">
         已有账号？
-        <button class="text-ink hover:text-body transition-colors" @click="router.push('/login')">
-          立即登录
-        </button>
+        <button class="text-ink hover:text-body transition-colors" @click="router.push('/login')">立即登录</button>
       </p>
     </div>
   </div>

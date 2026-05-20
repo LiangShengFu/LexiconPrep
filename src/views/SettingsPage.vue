@@ -1,13 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
+import api from '@/api/client'
 
-const nickname = ref('Lin Chen')
-const email = ref('linchen@example.com')
-const dailyGoal = ref(30)
-const pomodoroDuration = ref(25)
-const darkMode = ref(true)
-const notifications = ref(true)
-const soundEffects = ref(false)
+const auth = useAuthStore()
+
+const nickname = ref('')
+const email = ref('')
+const saving = ref(false)
+
+onMounted(() => {
+  if (auth.user) {
+    nickname.value = auth.user.nickname
+    email.value = auth.user.email
+  }
+})
+
+const saveProfile = async () => {
+  saving.value = true
+  try {
+    const { data } = await api.put('/users/me', { nickname: nickname.value })
+    auth.user = data
+    localStorage.setItem('user', JSON.stringify(data))
+    useUiStore().addToast('个人信息已保存', 'success')
+  } catch {
+    useUiStore().addToast('保存失败，请稍后重试', 'error')
+  } finally {
+    saving.value = false
+  }
+}
+
 </script>
 
 <template>
@@ -21,11 +44,24 @@ const soundEffects = ref(false)
       <!-- Profile -->
       <div class="card-xai space-y-4">
         <p class="eyebrow-mono-sm text-mute mb-2">个人信息</p>
+
+        <!-- Avatar -->
+        <div class="flex items-center gap-4 mb-2">
+          <div class="w-16 h-16 rounded-full bg-canvas-soft border border-hairline flex items-center justify-center text-2xl text-mute font-normal">
+            {{ nickname.value?.[0] || '?' }}
+          </div>
+          <div>
+            <p class="text-ink text-sm font-normal">{{ nickname.value }}</p>
+            <p class="text-mute text-xs">{{ email.value }}</p>
+          </div>
+        </div>
+
         <div>
           <label class="block text-body text-sm mb-2">显示名称</label>
           <input
             v-model="nickname"
             type="text"
+            placeholder="你的昵称"
             class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors"
           />
         </div>
@@ -34,60 +70,16 @@ const soundEffects = ref(false)
           <input
             v-model="email"
             type="email"
-            class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors"
+            disabled
+            class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-mute text-sm opacity-60 cursor-not-allowed"
           />
+          <p class="text-mute text-xs mt-1">邮箱暂不支持修改</p>
         </div>
+        <button class="btn-pill-filled text-sm px-6 py-2.5" :disabled="saving" @click="saveProfile">
+          {{ saving ? '保存中...' : '保存个人信息' }}
+        </button>
       </div>
 
-      <!-- Study Preferences -->
-      <div class="card-xai space-y-4">
-        <p class="eyebrow-mono-sm text-mute mb-2">学习目标</p>
-        <div>
-          <label class="block text-body text-sm mb-2">每日做题目标: {{ dailyGoal }} 题</label>
-          <input v-model.number="dailyGoal" type="range" min="10" max="100" step="5" class="w-full accent-white" />
-        </div>
-        <div>
-          <label class="block text-body text-sm mb-2">番茄钟时长: {{ pomodoroDuration }} 分钟</label>
-          <input v-model.number="pomodoroDuration" type="range" min="15" max="60" step="5" class="w-full accent-white" />
-        </div>
-      </div>
-
-      <!-- Toggles -->
-      <div class="card-xai space-y-4">
-        <p class="eyebrow-mono-sm text-mute mb-2">偏好设置</p>
-        <div class="flex items-center justify-between py-2">
-          <span class="text-body text-sm">深色模式</span>
-          <button
-            class="w-10 h-5 rounded-full transition-colors"
-            :class="darkMode ? 'bg-ink' : 'bg-canvas-mid'"
-            @click="darkMode = !darkMode"
-          >
-            <div class="w-4 h-4 rounded-full bg-canvas transition-transform" :class="darkMode ? 'translate-x-5' : 'translate-x-0.5'" />
-          </button>
-        </div>
-        <div class="flex items-center justify-between py-2 border-t border-hairline">
-          <span class="text-body text-sm">消息通知</span>
-          <button
-            class="w-10 h-5 rounded-full transition-colors"
-            :class="notifications ? 'bg-ink' : 'bg-canvas-mid'"
-            @click="notifications = !notifications"
-          >
-            <div class="w-4 h-4 rounded-full bg-canvas transition-transform" :class="notifications ? 'translate-x-5' : 'translate-x-0.5'" />
-          </button>
-        </div>
-        <div class="flex items-center justify-between py-2 border-t border-hairline">
-          <span class="text-body text-sm">音效</span>
-          <button
-            class="w-10 h-5 rounded-full transition-colors"
-            :class="soundEffects ? 'bg-ink' : 'bg-canvas-mid'"
-            @click="soundEffects = !soundEffects"
-          >
-            <div class="w-4 h-4 rounded-full bg-canvas transition-transform" :class="soundEffects ? 'translate-x-5' : 'translate-x-0.5'" />
-          </button>
-        </div>
-      </div>
-
-      <button class="btn-pill-filled text-sm px-8 py-3">保存设置</button>
     </div>
   </div>
 </template>

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -7,6 +6,7 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.models.question import Question
 from app.models.mistake import Mistake
+from app.models.study_log import StudyLog
 from app.models.user import User
 from app.api.deps import get_current_user
 from app.schemas.question import QuestionResponse, AnswerRequest, AnswerResponse
@@ -58,14 +58,27 @@ async def submit_answer(
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
 
-    is_correct = sorted(data.user_answer) == sorted(question.answer)
+    answer_str = ",".join(sorted(data.user_answer)) if data.user_answer else ""
+    correct_str = ",".join(sorted(question.answer)) if question.answer else ""
+    is_correct = answer_str == correct_str
 
+    # Write study log
+    log = StudyLog(
+        user_id=current_user.id,
+        question_id=question_id,
+        user_answer=answer_str,
+        is_correct=is_correct,
+        time_spent=data.time_spent,
+    )
+    db.add(log)
+
+    # Update user stats
+    current_user.total_knowledge_points = (current_user.total_knowledge_points or 0) + (1 if is_correct else 0)
+
+    # Auto-capture mistake
     if not is_correct:
         existing = await db.execute(
-            select(Mistake).where(
-                Mistake.user_id == current_user.id,
-                Mistake.question_id == question_id,
-            )
+            select(Mistake).where(Mistake.user_id == current_user.id, Mistake.question_id == question_id)
         )
         mistake = existing.scalar_one_or_none()
         if mistake:
@@ -82,10 +95,10 @@ async def submit_answer(
                 next_review_at=datetime.utcnow() + timedelta(days=1),
             )
             db.add(mistake)
-        await db.commit()
 
+    await db.commit()
     return AnswerResponse(
         is_correct=is_correct,
         correct_answer=question.answer,
-        analysis=question.analysis,
+        analysis=question.analysis if not is_correct else None,
     )

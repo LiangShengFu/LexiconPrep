@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     DEBUG: bool = True
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///./lexiconprep.db"
+    DATABASE_URL: str = "postgresql+asyncpg://taylor566@localhost:5432/lexiconprep"
     REDIS_URL: str = ""
 
     JWT_SECRET_KEY: str = "change-me-in-production-use-a-real-secret"

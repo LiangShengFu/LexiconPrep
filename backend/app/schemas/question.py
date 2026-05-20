@@ -1,9 +1,10 @@
+import uuid
 from datetime import datetime
 from pydantic import BaseModel
 
 
 class QuestionResponse(BaseModel):
-    id: str
+    id: uuid.UUID
     type: str
     content: str
     options: list

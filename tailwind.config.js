@@ -25,8 +25,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['Geist Mono', 'JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: ['Courier Prime', 'JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Courier New', 'monospace'],
+        mono: ['Courier Prime', 'JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Courier New', 'monospace'],
       },
       fontSize: {
         'display-xl': ['96px', { lineHeight: '96px', letterSpacing: '-2.4px', fontWeight: '400' }],
