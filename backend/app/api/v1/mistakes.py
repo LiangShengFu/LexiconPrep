@@ -82,8 +82,8 @@ async def review_mistake(
         intervals = [1, 3, 7, 14, 30, 60]
         idx = min(mistake.wrong_count, len(intervals) - 1)
         mistake.next_review_at = datetime.utcnow() + timedelta(days=intervals[idx])
-        mistake.wrong_count += 1
     else:
+        mistake.wrong_count += 1
         mistake.next_review_at = datetime.utcnow() + timedelta(days=1)
 
     await db.commit()

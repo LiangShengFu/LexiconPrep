@@ -89,18 +89,20 @@ async def seed():
             print("Created admin user: admin@lexiconprep.com / admin123")
 
         # Create questions
-        result = await db.execute(select(Question))
-        if result.first():
-            print(f"Questions already exist ({len(result.scalars().all())} found), skipping.")
+        q_result = await db.execute(select(Question))
+        q_rows = q_result.scalars().all()
+        if q_rows:
+            print(f"Questions already exist ({len(q_rows)} found), skipping.")
         else:
             for q in QUESTIONS:
                 db.add(Question(**q))
             print(f"Created {len(QUESTIONS)} questions.")
 
         # Create resources
-        result = await db.execute(select(Resource))
-        if result.first():
-            print(f"Resources already exist ({len(result.scalars().all())} found), skipping.")
+        r_result = await db.execute(select(Resource))
+        r_rows = r_result.scalars().all()
+        if r_rows:
+            print(f"Resources already exist ({len(r_rows)} found), skipping.")
         else:
             for r in RESOURCES:
                 db.add(Resource(**r))

@@ -18,6 +18,6 @@ class Question(Base):
     answer: Mapped[dict] = mapped_column(JSONB, nullable=False)
     analysis: Mapped[str | None] = mapped_column(Text, nullable=True)
     difficulty: Mapped[int] = mapped_column(Integer, default=1)
-    subject: Mapped[str] = mapped_column(String(50), nullable=False)
+    subject: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     chapter: Mapped[str | None] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

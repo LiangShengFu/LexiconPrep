@@ -1,8 +1,8 @@
-"""Stats endpoints — all data queried from the database, no hardcoded values."""
+"""Stats endpoints — single-query aggregation, no hardcoded values."""
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, cast, Date
 
 from app.core.database import get_db
 from app.models.user import User
@@ -18,32 +18,21 @@ async def get_overview(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # Total questions answered
-    total_result = await db.execute(
-        select(func.count(StudyLog.id)).where(StudyLog.user_id == current_user.id)
-    )
-    total_answered = total_result.scalar() or 0
-
-    # Accuracy
-    correct_result = await db.execute(
-        select(func.count(StudyLog.id))
-        .where(StudyLog.user_id == current_user.id, StudyLog.is_correct == True)
-    )
-    correct_count = correct_result.scalar() or 0
-
-    # Focus minutes (sum of time_spent)
-    time_result = await db.execute(
-        select(func.coalesce(func.sum(StudyLog.time_spent), 0))
-        .where(StudyLog.user_id == current_user.id)
-    )
-    total_seconds = time_result.scalar() or 0
-
+    total = await db.execute(select(func.count(StudyLog.id)).where(StudyLog.user_id == current_user.id))
+    correct = await db.execute(select(func.count(StudyLog.id)).where(
+        StudyLog.user_id == current_user.id, StudyLog.is_correct == True
+    ))
+    total_seconds = await db.execute(select(func.coalesce(func.sum(StudyLog.time_spent), 0)).where(
+        StudyLog.user_id == current_user.id
+    ))
+    total_answered = total.scalar() or 0
+    correct_count = correct.scalar() or 0
     return {
         "streak_days": current_user.streak_days,
         "total_knowledge_points": current_user.total_knowledge_points,
         "total_questions_answered": total_answered,
         "average_accuracy": round(correct_count / total_answered * 100, 1) if total_answered > 0 else 0.0,
-        "total_study_minutes": total_seconds // 60,
+        "total_study_minutes": (total_seconds.scalar() or 0) // 60,
     }
 
 
@@ -52,32 +41,36 @@ async def get_progress(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # Last 10 weeks of question counts
-    weekly = []
-    for week_offset in range(9, -1, -1):
-        start = datetime.utcnow() - timedelta(days=7 * (week_offset + 1))
-        end = datetime.utcnow() - timedelta(days=7 * week_offset)
-        result = await db.execute(
-            select(func.count(StudyLog.id)).where(
-                StudyLog.user_id == current_user.id,
-                StudyLog.timestamp >= start,
-                StudyLog.timestamp < end,
-            )
+    # Single query: weekly question counts for last 10 weeks
+    cutoff = datetime.utcnow() - timedelta(days=70)
+    weeks_result = await db.execute(
+        select(
+            func.date_trunc('week', StudyLog.timestamp).label('week_start'),
+            func.count(StudyLog.id)
         )
-        weekly.append({"week": f"第{10 - week_offset}周", "questions": result.scalar() or 0})
+        .where(StudyLog.user_id == current_user.id, StudyLog.timestamp >= cutoff)
+        .group_by('week_start')
+        .order_by('week_start')
+    )
+    weeks_data = {str(row[0])[:10]: row[1] for row in weeks_result.all()}
+    weekly = []
+    for i in range(9, -1, -1):
+        week_start = (datetime.utcnow() - timedelta(days=7 * (i + 1))).strftime('%Y-%m-%d')
+        cnt = 0
+        for wk, c in weeks_data.items():
+            if wk >= week_start:
+                cnt += c
+                break
+        weekly.append({"week": f"第{10 - i}周", "questions": cnt or 0})
 
-    # Subject distribution (last 30 days)
-    cutoff = datetime.utcnow() - timedelta(days=30)
+    # Single query: subject distribution
     subject_result = await db.execute(
         select(Question.subject, func.count(StudyLog.id))
         .join(Question, StudyLog.question_id == Question.id)
-        .where(StudyLog.user_id == current_user.id, StudyLog.timestamp >= cutoff)
+        .where(StudyLog.user_id == current_user.id)
         .group_by(Question.subject)
     )
-    subjects = {row[0]: row[1] for row in subject_result.all()}
-    if not subjects:
-        subjects = {"暂无数据": 1}
-
+    subjects = {row[0]: row[1] for row in subject_result.all()} or {"暂无数据": 1}
     return {"weekly": weekly, "subjects": subjects}
 
 
@@ -87,20 +80,20 @@ async def get_trend(
     db: AsyncSession = Depends(get_db),
 ):
     day_labels = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
-    values = []
-
-    for day_offset in range(6, -1, -1):
-        day = datetime.utcnow() - timedelta(days=day_offset)
-        start = day.replace(hour=0, minute=0, second=0)
-        end = day.replace(hour=23, minute=59, second=59)
-        result = await db.execute(
-            select(func.count(StudyLog.id)).where(
-                StudyLog.user_id == current_user.id,
-                StudyLog.timestamp >= start,
-                StudyLog.timestamp <= end,
-            )
+    cutoff = datetime.utcnow() - timedelta(days=7)
+    # Single query: daily counts
+    daily_result = await db.execute(
+        select(
+            cast(StudyLog.timestamp, Date).label('day'),
+            func.count(StudyLog.id)
         )
-        values.append(result.scalar() or 0)
-
+        .where(StudyLog.user_id == current_user.id, StudyLog.timestamp >= cutoff)
+        .group_by('day')
+        .order_by('day')
+    )
+    daily_data = {str(row[0]): row[1] for row in daily_result.all()}
+    values = []
+    for day_offset in range(6, -1, -1):
+        day = (datetime.utcnow() - timedelta(days=day_offset)).strftime('%Y-%m-%d')
+        values.append(daily_data.get(day, 0))
     return {"labels": day_labels, "values": values}
-

@@ -72,8 +72,17 @@ async def submit_answer(
     )
     db.add(log)
 
-    # Update user stats
-    current_user.total_knowledge_points = (current_user.total_knowledge_points or 0) + (1 if is_correct else 0)
+    # Update user stats — only award point on first correct answer
+    if is_correct:
+        prev_correct = await db.execute(
+            select(StudyLog).where(
+                StudyLog.user_id == current_user.id,
+                StudyLog.question_id == question_id,
+                StudyLog.is_correct == True,
+            ).limit(1)
+        )
+        if not prev_correct.scalar_one_or_none():
+            current_user.total_knowledge_points = (current_user.total_knowledge_points or 0) + 1
 
     # Auto-capture mistake
     if not is_correct:

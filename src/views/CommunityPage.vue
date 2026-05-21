@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 interface Post { id: string; user_id: string; content: string; subject: string | null; likes: number; created_at: string; user_nickname: string | null; user_avatar_letters: string | null }
@@ -39,8 +40,10 @@ const createPost = async () => {
 }
 
 const likePost = async (post: Post) => {
-  await api.post(`/community/posts/${post.id}/like`)
-  post.likes++
+  try {
+    const { data } = await api.post(`/community/posts/${post.id}/like`)
+    post.likes = data.likes
+  } catch { useUiStore().addToast('点赞失败', 'error') }
 }
 
 const timeAgo = (dateStr: string) => {

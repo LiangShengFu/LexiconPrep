@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 interface User { id: string; email: string; nickname: string; role: string; streak_days: number; total_knowledge_points: number; created_at: string }

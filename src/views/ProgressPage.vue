@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { Chart, registerables } from 'chart.js'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { Chart, BarController, DoughnutController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
 import api from '@/api/client'
 
-Chart.register(...registerables)
+Chart.register(BarController, DoughnutController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
 const trendChart = ref<HTMLCanvasElement | null>(null)
 const subjectChart = ref<HTMLCanvasElement | null>(null)
 const loading = ref(true)
 const error = ref('')
+let trendInstance: Chart | null = null
+let subjectInstance: Chart | null = null
+
+onBeforeUnmount(() => {
+  trendInstance?.destroy()
+  subjectInstance?.destroy()
+})
 
 const stats = ref([
   { label: '累计做题', value: '0' },
@@ -33,7 +40,8 @@ onMounted(async () => {
     ]
 
     if (trendChart.value) {
-      new Chart(trendChart.value, {
+      trendInstance?.destroy()
+      trendInstance = new Chart(trendChart.value, {
         type: 'bar',
         data: {
           labels: tr.data.labels,
@@ -58,7 +66,8 @@ onMounted(async () => {
     if (subjectChart.value) {
       const labels = Object.keys(pr.data.subjects)
       const values = Object.values(pr.data.subjects) as number[]
-      new Chart(subjectChart.value, {
+      subjectInstance?.destroy()
+      subjectInstance = new Chart(subjectChart.value, {
         type: 'doughnut',
         data: {
           labels,

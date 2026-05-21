@@ -10,32 +10,9 @@ from app.models.question import Question
 from app.models.study_log import StudyLog
 from app.api.deps import get_admin_user
 from app.schemas.user import UserListResponse, UserRoleUpdate
-from app.schemas.question import QuestionResponse
-from pydantic import BaseModel
+from app.schemas.question import QuestionResponse, QuestionCreate, QuestionUpdate
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-
-
-class QuestionCreate(BaseModel):
-    type: str = "SINGLE"
-    content: str
-    options: list[str]
-    answer: list[str]
-    analysis: str | None = None
-    difficulty: int = 1
-    subject: str
-    chapter: str | None = None
-
-
-class QuestionUpdate(BaseModel):
-    type: str | None = None
-    content: str | None = None
-    options: list[str] | None = None
-    answer: list[str] | None = None
-    analysis: str | None = None
-    difficulty: int | None = None
-    subject: str | None = None
-    chapter: str | None = None
 
 
 # ─── Questions CRUD ───

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 interface Question { id: string; type: string; content: string; options: string[]; answer: string[]; subject: string; difficulty: number; chapter: string | null }
