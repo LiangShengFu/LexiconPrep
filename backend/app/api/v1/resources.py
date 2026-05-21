@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.database import get_db
+from app.core.utils import escape_search
 from app.models.resource import Resource
 from app.models.user import User
 from app.api.deps import get_current_user
@@ -27,7 +28,7 @@ async def list_resources(
     if type:
         q = q.where(Resource.type == type)
     if search:
-        q = q.where(Resource.title.ilike(f"%{search}%"))
+        q = q.where(Resource.title.ilike(f"%{escape_search(search)}%"))
     q = q.offset(offset).limit(limit)
     result = await db.execute(q)
     return [ResourceResponse.model_validate(row) for row in result.scalars().all()]

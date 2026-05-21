@@ -5,5 +5,6 @@ from app.models.flashcard import Flashcard
 from app.models.resource import Resource
 from app.models.study_log import StudyLog
 from app.models.community import CommunityPost
+from app.models.post_like import PostLike
 
-__all__ = ["User", "Question", "Mistake", "Flashcard", "Resource", "StudyLog", "CommunityPost"]
+__all__ = ["User", "Question", "Mistake", "Flashcard", "Resource", "StudyLog", "CommunityPost", "PostLike"]

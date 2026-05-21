@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PostCreate(BaseModel):
-    content: str
-    subject: str | None = None
+    content: str = Field(..., max_length=2000)
+    subject: str | None = Field(None, max_length=50)
 
 
 class PostResponse(BaseModel):

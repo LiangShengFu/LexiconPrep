@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.question import Question
 from app.models.study_log import StudyLog
 from app.api.deps import get_admin_user
+from app.core.utils import escape_search
 from app.schemas.user import UserListResponse, UserRoleUpdate
 from app.schemas.question import QuestionResponse, QuestionCreate, QuestionUpdate
 
@@ -30,7 +31,7 @@ async def admin_list_questions(
     if subject:
         q = q.where(Question.subject == subject)
     if search:
-        q = q.where(Question.content.ilike(f"%{search}%"))
+        q = q.where(Question.content.ilike(f"%{escape_search(search)}%"))
     q = q.order_by(Question.created_at.desc()).offset(offset).limit(limit)
     result = await db.execute(q)
     return [QuestionResponse.model_validate(row) for row in result.scalars().all()]

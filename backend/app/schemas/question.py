@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class QuestionResponse(BaseModel):
@@ -18,13 +18,13 @@ class QuestionResponse(BaseModel):
 
 class QuestionCreate(BaseModel):
     type: str = "SINGLE"
-    content: str
+    content: str = Field(..., max_length=2000)
     options: list[str]
     answer: list[str]
-    analysis: str | None = None
-    difficulty: int = 1
-    subject: str
-    chapter: str | None = None
+    analysis: str | None = Field(None, max_length=2000)
+    difficulty: int = Field(default=1, ge=1, le=5)
+    subject: str = Field(..., max_length=50)
+    chapter: str | None = Field(None, max_length=100)
 
 
 class QuestionUpdate(BaseModel):

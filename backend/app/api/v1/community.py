@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc
 from app.core.database import get_db
 from app.models.community import CommunityPost
+from app.models.post_like import PostLike
 from app.models.user import User
 from app.models.study_log import StudyLog
 from app.api.deps import get_current_user
@@ -67,6 +68,13 @@ async def like_post(
     post = result.scalar_one_or_none()
     if not post:
         raise HTTPException(status_code=404, detail="帖子不存在")
+    # Check if already liked
+    existing = await db.execute(
+        select(PostLike).where(PostLike.user_id == current_user.id, PostLike.post_id == post_id)
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="已经点过赞了")
+    db.add(PostLike(user_id=current_user.id, post_id=post_id))
     post.likes += 1
     await db.commit()
     return {"likes": post.likes}
