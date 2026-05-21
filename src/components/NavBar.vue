@@ -1,27 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const loggedIn = ref(false)
 
 const checkAuth = () => {
   loggedIn.value = !!localStorage.getItem('access_token')
 }
 
-onMounted(checkAuth)
+checkAuth()
 
-// Re-check when visibility changes (user navigates back)
-if (typeof window !== 'undefined') {
-  window.addEventListener('focus', checkAuth)
-}
+// Re-check on every route change
+watch(() => route.path, checkAuth)
 
 const goTo = (path: string) => router.push(path)
 
 const logout = () => {
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  localStorage.removeItem('user')
+  localStorage.clear()
   loggedIn.value = false
   router.push('/')
 }
@@ -36,7 +33,6 @@ const logout = () => {
 
       <nav class="hidden md:flex items-center gap-8">
         <button class="text-body text-sm font-normal hover:text-ink transition-colors" @click="goTo('/library')">资源库</button>
-        <button class="text-body text-sm font-normal hover:text-ink transition-colors" @click="goTo('/exam')">做题</button>
         <button class="text-body text-sm font-normal hover:text-ink transition-colors" @click="goTo('/flashcards')">闪卡</button>
         <button class="text-body text-sm font-normal hover:text-ink transition-colors" @click="goTo('/community')">社区</button>
       </nav>

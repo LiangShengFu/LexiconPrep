@@ -48,7 +48,7 @@ const handleRegister = async () => {
   <div class="min-h-screen bg-canvas pt-14 flex items-center justify-center">
     <div class="w-full max-w-[400px] px-6">
       <p class="eyebrow-mono mb-6 text-center">LexiconPrep</p>
-      <h1 class="text-display-sm text-ink mb-8 text-center">创建你的账号。</h1>
+      <h1 class="text-display-sm text-ink mb-8 text-center">创建你的账号</h1>
 
       <div class="card-xai space-y-5">
         <div v-if="error" class="text-red-400 text-sm text-center bg-red-400/10 rounded-card py-3 px-4">

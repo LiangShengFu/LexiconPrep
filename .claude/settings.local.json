@@ -62,7 +62,8 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'OK: {d.get\\(\\\\\"user\\\\\",{}\\).get\\(\\\\\"nickname\\\\\",\\\\\"FAIL\\\\\"\\)}'\\)\")",
       "Bash(python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\)\\)\")",
       "Bash(curl -s -X POST http://localhost:8000/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@lexiconprep.com\",\"password\":\"newpass123\"}')",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Error: {d[\\\\\"detail\\\\\"]}'\\)\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Error: {d[\\\\\"detail\\\\\"]}'\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'avatar saved: {bool\\(d[\\\\\"avatar\\\\\"]\\)}, nickname={d[\\\\\"nickname\\\\\"]}'\\)\")"
     ]
   }
 }

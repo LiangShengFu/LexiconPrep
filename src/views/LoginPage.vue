@@ -43,7 +43,7 @@ const handleLogin = async () => {
   <div class="min-h-screen bg-canvas pt-14 flex items-center justify-center">
     <div class="w-full max-w-[400px] px-6">
       <p class="eyebrow-mono mb-6 text-center">LexiconPrep</p>
-      <h1 class="text-display-sm text-ink mb-8 text-center">登录你的账号。</h1>
+      <h1 class="text-display-sm text-ink mb-8 text-center">登录你的账号</h1>
 
       <div class="card-xai space-y-5">
         <div v-if="error" class="text-red-400 text-sm text-center bg-red-400/10 rounded-card py-3 px-4">
@@ -83,7 +83,7 @@ const handleLogin = async () => {
         <button class="text-ink hover:text-body transition-colors" @click="router.push('/register')">立即注册</button>
       </p>
 
-      <p class="text-mute text-xs text-center mt-4">测试账号: test@lexiconprep.com / test123</p>
+      <p class="text-mute text-xs text-center mt-4"></p>
     </div>
   </div>
 </template>

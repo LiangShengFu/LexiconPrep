@@ -75,7 +75,7 @@ const features = [
         LexiconPrep 整合自适应题库、智能闪卡复习与实时进度分析，为考研学子打造一站式专注备考平台。
       </p>
       <div class="flex items-center gap-4 mt-10">
-        <button class="btn-pill-filled cursor-target text-base px-6 py-3 cursor-target" @click="router.push('/register')">
+        <button class="btn-pill-filled cursor-target text-base px-6 py-3" @click="router.push('/login')">
           开始备考
         </button>
         <button class="btn-pill-outline cursor-target text-base px-6 py-3 cursor-target" @click="router.push('/profile')">

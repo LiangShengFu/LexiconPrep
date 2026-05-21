@@ -13,6 +13,7 @@ const router = createRouter({
     { path: '/exam', name: 'exam', component: () => import('@/views/ExamPage.vue'), meta: { requiresAuth: true } },
     { path: '/flashcards', name: 'flashcards', component: () => import('@/views/FlashcardsPage.vue'), meta: { requiresAuth: true } },
     { path: '/progress', name: 'progress', component: () => import('@/views/ProgressPage.vue'), meta: { requiresAuth: true } },
+    { path: '/pomodoro', name: 'pomodoro', component: () => import('@/views/PomodoroPage.vue') },
     { path: '/community', name: 'community', component: () => import('@/views/CommunityPage.vue'), meta: { requiresAuth: true } },
     { path: '/admin', name: 'adminOverview', component: () => import('@/views/admin/AdminOverviewPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/admin/questions', name: 'adminQuestions', component: () => import('@/views/admin/AdminQuestionsPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
