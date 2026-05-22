@@ -89,7 +89,7 @@ const deleteCard = async (id: string) => {
     </div>
 
     <div v-if="hasCards" class="flex flex-col items-center">
-      <div class="w-full max-w-[600px] aspect-[3/2] cursor-pointer" @click="flip">
+      <div class="w-full max-w-[600px] aspect-[3/2] cursor-pointer" tabindex="0" @click="flip" @keyup.enter="flip" @keydown.space.prevent="flip" aria-label="闪卡，点击或按回车翻转">
         <div class="relative w-full h-full transition-transform duration-500" :style="{ transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)', transformStyle: 'preserve-3d' }">
           <div class="absolute inset-0 card-xai flex flex-col justify-center items-center p-10" :style="{ backfaceVisibility: 'hidden' }">
             <span v-if="currentCard.subject" class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute font-mono uppercase mb-4">{{ currentCard.subject }}</span>
@@ -104,7 +104,7 @@ const deleteCard = async (id: string) => {
       </div>
       <div class="flex items-center gap-4 mt-6">
         <button class="btn-pill-outline cursor-target text-sm" @click="prevCard">上一张</button>
-        <span class="text-mute text-sm">{{ currentIndex + 1 }} / {{ filteredCards.length }}</span>
+        <span class="text-mute text-sm">{{ currentIndex + 1 }} / {{ cards.length }}</span>
         <button class="btn-pill-outline cursor-target text-sm" @click="nextCard">下一张</button>
       </div>
       <div class="flex items-center gap-3 mt-4">

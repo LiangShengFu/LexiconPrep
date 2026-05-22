@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import api from '@/api/client'
 
 const activeTab = ref<'resources' | 'mistakes'>('resources')
@@ -22,7 +22,16 @@ const mistakes = ref<MistakeItem[]>([])
 const loading = ref(false)
 const error = ref('')
 
-const subjects = ['政治', '英语', '数学', '计算机科学', '法学', '心理学']
+const subjects = ref<string[]>(['政治', '英语', '数学', '计算机科学', '法学', '心理学'])
+
+const fetchSubjects = async () => {
+  try {
+    const { data } = await api.get('/questions/subjects')
+    if (data.length) subjects.value = data
+  } catch { /* keep defaults */ }
+}
+
+onMounted(() => { fetchSubjects() })
 const types = ['PDF', 'DOC', 'VIDEO']
 
 const loadResources = async () => {

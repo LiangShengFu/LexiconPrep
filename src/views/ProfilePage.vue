@@ -106,14 +106,24 @@ const saveProfile = async () => {
   finally { profileSaving.value = false }
 }
 
-const checkIn = () => {
+const checkIn = async () => {
   const tds = today.toISOString().slice(0, 10)
-  if (checkinDates.value.has(tds)) return
-  const updated = new Set(checkinDates.value); updated.add(tds)
-  checkinDates.value = updated
-  localStorage.setItem('checkin_dates', JSON.stringify([...updated]))
-  streakDays.value++; checkedIn.value = true
-  useUiStore().addToast('打卡成功！连续 ' + streakDays.value + ' 天', 'success')
+  if (checkedIn.value) return
+  try {
+    const { data } = await api.post('/users/me/checkin')
+    if (data.status === 'already_checked_in') {
+      checkedIn.value = true
+      return
+    }
+    streakDays.value = data.streak_days
+    const updated = new Set(checkinDates.value); updated.add(tds)
+    checkinDates.value = updated
+    localStorage.setItem('checkin_dates', JSON.stringify([...updated]))
+    checkedIn.value = true
+    useUiStore().addToast('打卡成功！连续 ' + streakDays.value + ' 天', 'success')
+  } catch {
+    useUiStore().addToast('打卡失败', 'error')
+  }
 }
 </script>
 
@@ -138,7 +148,7 @@ const checkIn = () => {
           <div class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <span class="text-white text-xs">{{ avatarUploading ? '上传中...' : '更换' }}</span>
           </div>
-          <input type="file" accept="image/*" class="hidden" @change="handleAvatarUpload" />
+          <input type="file" accept="image/*" class="hidden" aria-label="上传头像" @change="handleAvatarUpload" />
         </label>
         <div>
           <p class="text-ink text-lg">{{ nickname }}</p>

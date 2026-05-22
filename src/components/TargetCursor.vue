@@ -11,7 +11,7 @@ interface TargetCursorProps {
 const props = withDefaults(defineProps<TargetCursorProps>(), {
   targetSelector: '.cursor-target',
   spinDuration: 2,
-  hideDefaultCursor: true,
+  hideDefaultCursor: false,
 })
 
 const cursorRef = useTemplateRef('cursorRef')

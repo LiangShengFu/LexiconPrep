@@ -27,6 +27,10 @@ async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
     if exists.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="邮箱已被注册")
 
+    nickname_exists = await db.execute(select(User).where(User.nickname == data.nickname))
+    if nickname_exists.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="昵称已被使用")
+
     user = User(
         email=data.email,
         password_hash=hash_password(data.password),

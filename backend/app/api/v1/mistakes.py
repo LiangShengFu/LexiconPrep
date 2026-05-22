@@ -24,7 +24,7 @@ async def list_mistakes(
     q = (
         select(Mistake, Question.content, Question.subject)
         .join(Question, Mistake.question_id == Question.id)
-        .where(Mistake.user_id == current_user.id)
+        .where(Mistake.user_id == current_user.id, Mistake.mastered == False)
         .order_by(Mistake.next_review_at.asc())
         .offset(offset).limit(limit)
     )
@@ -78,12 +78,15 @@ async def review_mistake(
         raise HTTPException(status_code=404, detail="Mistake not found")
 
     mistake.last_review_at = datetime.utcnow()
+    mistake.review_count = (mistake.review_count or 0) + 1
     if remembered:
+        mistake.mastered = True
         intervals = [1, 3, 7, 14, 30, 60]
         idx = min(mistake.wrong_count, len(intervals) - 1)
         mistake.next_review_at = datetime.utcnow() + timedelta(days=intervals[idx])
     else:
         mistake.wrong_count += 1
+        mistake.mastered = False
         mistake.next_review_at = datetime.utcnow() + timedelta(days=1)
 
     await db.commit()

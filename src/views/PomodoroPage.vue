@@ -60,13 +60,13 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
       <button class="absolute top-6 left-6 btn-pill-outline cursor-target text-sm" @click="showSettings = true">设置</button>
 
       <p class="eyebrow-mono mb-6">{{ isWork ? '专注模式' : '休息时间' }}</p>
-      <div class="relative" style="width:400px;height:400px">
+      <div class="relative max-w-[400px] w-full aspect-square">
         <svg class="w-full h-full -rotate-90" viewBox="0 0 400 400">
           <circle cx="200" cy="200" :r="radius" fill="none" stroke="#212327" stroke-width="6" />
           <circle cx="200" cy="200" :r="radius" fill="none" :stroke="isWork ? '#ff7a17' : '#50e3c2'" stroke-width="6" stroke-linecap="round"
             :stroke-dasharray="circumference" :stroke-dashoffset="circumference * (1 - progress / 100)" class="transition-all duration-1000" />
         </svg>
-        <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <div class="absolute inset-0 flex flex-col items-center justify-center" role="timer" :aria-label="label + '模式，剩余' + display" aria-live="polite">
           <span class="text-[96px] text-ink font-mono tracking-tight leading-none">{{ display }}</span>
           <span class="text-2xl text-mute mt-2">{{ label }}</span>
           <span class="text-sm text-mute mt-1">{{ isWork ? workMinutes : breakMinutes }} 分钟</span>

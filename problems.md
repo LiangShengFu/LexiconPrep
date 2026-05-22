@@ -1,4 +1,4 @@
-# LexiconPrep 问题清单（2026-05-21 全量审查）
+# LexiconPrep 问题清单（2026-05-21 深度审查 v2）
 
 ---
 
@@ -246,3 +246,89 @@
 | P3 性能 | 8 | 构建体积和运行时性能 |
 | P4 规范 | 14 | 文档一致性和工程规范 |
 | **合计** | **75** | 不含已修复 8 项和待人工 9 项 |
+
+---
+
+## 🔍 深度审查补充（v2 新增）
+
+### A. 无障碍性（a11y）问题
+
+| # | 文件 | 问题 | 修复建议 |
+|---|------|------|---------|
+| A1 | 全局 | 所有 `<button>` 使用 `<button>` 标签但无 `aria-label`，图标按钮（如删除、编辑、返回）无文字说明 | 添加 `aria-label` 属性 |
+| A2 | 全局 | 22 处 `focus:outline-none` 移除了所有焦点轮廓，键盘用户无法识别当前聚焦元素 | 改为 `focus:outline-none focus:ring-2 focus:ring-ink` 保留可见焦点 |
+| A3 | `src/components/TargetCursor.vue:33` | `hideDefaultCursor: true` 隐藏系统光标，影响无障碍使用 | 提供可配置选项，默认不隐藏 |
+| A4 | `src/views/ExamPage.vue` | 答题选项使用 `<button>` 但无 `role="radio"` 或 `aria-checked`，屏幕阅读器无法识别为选项组 | 添加 `role="radiogroup"` + `role="radio"` + `aria-checked` |
+| A5 | `src/views/FlashcardsPage.vue:96` | 闪卡翻转仅依赖 `@click`，无键盘操作支持 | 添加 `@keyup.enter` / `@keydown.space` 和 `tabindex="0"` |
+| A6 | `src/components/ToastContainer.vue` | Toast 通知无 `role="alert"` 或 `aria-live="polite"`，屏幕阅读器不会播报 | 添加 `role="alert"` 和 `aria-live="polite"` |
+| A7 | `src/views/ProfilePage.vue:131` | 头像上传 `<input type="file">` 隐藏在 `<label>` 内，但 label 无描述性文字 | 添加 `aria-label="上传头像"` |
+| A8 | `src/components/ErrorBoundary.vue` | 错误边界无 `role="alert"` | 添加 `role="alert"` |
+| A9 | `src/views/PomodoroPage.vue` | 番茄钟全屏模式无 `aria-label` 描述计时器状态 | 添加 `aria-label` 和 `aria-live` |
+| A10 | `index.html:10` | 仅加载了 Courier Prime 字体，缺少 Geist Mono 和 JetBrains Mono 的 Google Fonts 链接，回退到系统字体 | 添加字体 CDN 或本地字体文件 |
+
+### B. 响式 / 移动端问题
+
+| # | 文件 | 问题 | 修复建议 |
+|---|------|------|---------|
+| B1 | `src/components/NavBar.vue:34` | 导航链接 `hidden md:flex`，移动端无汉堡菜单，无法导航 | 添加移动端汉堡菜单 |
+| B2 | `src/components/AppShell.vue:38` | 侧边栏固定 `w-56`，移动端占据过多空间 | 添加移动端折叠/抽屉式侧边栏 |
+| B3 | `src/views/ExamPage.vue:139` | 答题区 `lg:grid-cols-4`，移动端答题卡占满宽度，题目区域被压缩 | 优化移动端布局，答题卡改为底部浮动 |
+| B4 | `src/views/PomodoroPage.vue:63` | 番茄钟 SVG 固定 `400x400px`，小屏幕溢出 | 改为响应式尺寸 `max-w-[400px] w-full` |
+| B5 | `src/views/CommunityPage.vue:68` | 发帖区 textarea 无 `max-height` 限制，移动端可能撑满屏幕 | 添加 `max-h-[120px]` |
+| B6 | `src/components/FaultyTerminal.vue` | WebGL 终端特效在低端移动设备上可能导致性能问题 | 检测设备性能，低端设备降级或跳过渲染 |
+
+### C. 业务逻辑 / 数据一致性问题
+
+| # | 文件 | 问题 | 修复建议 |
+|---|------|------|---------|
+| C1 | `backend/app/api/v1/questions.py:86-95` | 答错时自动创建错题记录，但答对时不检查是否已有错题记录（已掌握的题不应再出现在错题本中） | 答对时检查并标记已有错题记录为"已掌握" |
+| C2 | `backend/app/api/v1/mistakes.py:82-85` | 复习错题时 `wrong_count += 1` 无论 remembered 与否，语义混乱 | remembered 时不增加 wrong_count，增加 `review_count` 字段 |
+| C3 | `backend/app/api/v1/stats.py` | `overview` 和 `progress` 端点返回的 `streak_days` 来自 User 表，但打卡系统是前端 localStorage 实现，两者不同步 | 统一打卡逻辑到后端 |
+| C4 | `backend/app/services/auth.py` | `decode_token` 函数已定义但**从未被使用**（deps.py 直接内联了相同逻辑） | 删除或统一使用 |
+| C5 | `backend/app/api/v1/auth.py` | 注册时未校验 nickname 唯一性，两个用户可以有相同昵称 | 添加 nickname 唯一性校验或接受重复 |
+| C6 | `backend/app/api/v1/questions.py:76` | `total_knowledge_points` 每次答对 +1，但重复答对同一题也累加，且答错不减少 | 添加 StudyLog 去重查询，同一题仅首次答对计分 |
+| C7 | `backend/app/api/v1/admin.py:93-105` | 删除题目时不级联删除关联的 mistakes 和 study_logs 记录 | 添加级联删除或软删除 |
+| C8 | `backend/app/api/v1/admin.py:122-135` | 管理员可将任何用户（包括自己）降级为普通用户，可能导致无管理员 | 添加自保护逻辑：不允许降级最后一个管理员 |
+| C9 | `src/views/ExamPage.vue:25` | 学科列表硬编码为 `['政治', '英语', '数学']`，与后端实际学科不同步 | 从后端获取学科列表或提取为常量 |
+| C10 | `src/views/LibraryPage.vue:25` | 资源库学科列表硬编码为 6 个，与种子数据不完全匹配 | 从后端动态获取学科列表 |
+| C11 | `backend/app/api/v1/community.py:99` | 排行榜 `cutoff` 使用 `datetime.utcnow()`，但数据库中 `timestamp` 使用 `server_default=func.now()`，两者时区可能不一致 | 统一使用 UTC 时区感知的 datetime |
+| C12 | 后端全局 | 14 处使用 `datetime.utcnow()`（已弃用），Python 3.12+ 推荐使用 `datetime.now(timezone.utc)` | 全局替换为 `datetime.now(timezone.utc)` |
+
+### D. 组件级问题
+
+| # | 文件 | 问题 | 修复建议 |
+|---|------|------|---------|
+| D1 | `src/components/FaultyTerminal.vue:293` | `watch(() => props, ..., { deep: true })` 任何 prop 变化都触发完整重建（cleanup + setup），性能极差 | 细粒度 watch，仅监听变化的 prop 并更新对应 uniform |
+| D2 | `src/components/FaultyTerminal.vue:196` | `dpr` 默认值 `Math.min(window.devicePixelRatio \|\| 1, 2)` 在 SSR 或 Node 环境下 `window` 不存在 | 添加 `typeof window !== 'undefined'` 守卫 |
+| D3 | `src/components/TargetCursor.vue:58` | `window.addEventListener('mousemove', ...)` 全局监听但未在 cleanupAnimation 中移除 | 在 cleanupAnimation 中移除 mousemove 和 mouseover 全局监听 |
+| D4 | `src/components/TargetCursor.vue:60` | `window.addEventListener('mouseover', ...)` 同上，全局监听未清理 | 同上 |
+| D5 | `src/components/SkeletonLoader.vue:13` | `Math.random()` 在模板中使用，每次渲染产生不同的宽度，导致布局抖动 | 使用固定宽度或基于 index 的确定性值 |
+| D6 | `src/components/DecryptedText.vue:87` | watch 监听了 8 个依赖项，任何变化都重置动画，过于激进 | 仅在关键 props（text、animateOn）变化时重置 |
+| D7 | `src/components/ToastContainer.vue:12` | Toast 位置固定 `bottom-6 right-6`，与 PomodoroTimer 组件位置重叠 | Toast 改为 `top-6 right-6` 或动态调整位置 |
+| D8 | `src/components/ErrorBoundary.vue:13` | `retry()` 仅重置状态，不重新挂载子组件，可能无法真正恢复 | 使用 `:key` 强制重新渲染子组件 |
+
+### E. 配置 / 环境问题
+
+| # | 文件 | 问题 | 修复建议 |
+|---|------|------|---------|
+| E1 | `backend/.env.example:9` | JWT_SECRET_KEY 示例值与代码默认值相同，用户可能直接使用 | 示例值改为 `<your-secret-key-here>` |
+| E2 | `backend/.env.example` | 缺少 `RATE_LIMIT_PER_MINUTE` 和 `DEBUG` 配置项 | 补充完整配置模板 |
+| E3 | `.gitignore` | 缺少 `*.env`（仅有 `.env`）、`backend/.env`、`node_modules` 的精确路径 | 补充 `.env*`、`backend/*.db` 等 |
+| E4 | `index.html` | 缺少 `<meta name="description">` SEO 标签 | 添加描述和 Open Graph 标签 |
+| E5 | `env.d.ts` | 未声明 `import.meta.env.VITE_API_BASE_URL` 类型 | 添加 `ImportMetaEnv` 接口声明 |
+| E6 | `tsconfig.json:14` | `strict: true` 已启用，但 `noUnusedLocals: false` 和 `noUnusedParameters: false` 放宽了检查 | 逐步启用，清理未使用的变量和参数 |
+| E7 | `backend/app/main.py:23-28` | CORS `allow_origins` 硬编码 `localhost:3000` 和 `localhost:5173`，生产环境需手动修改 | 从环境变量读取 `ALLOWED_ORIGINS` |
+| E8 | `backend/app/core/config.py` | `RATE_LIMIT_PER_MINUTE` 已定义但**从未使用** | 实现限流中间件或移除配置 |
+
+---
+
+## v2 统计更新
+
+| 优先级 | v1 数量 | v2 新增 | 合计 |
+|--------|---------|---------|------|
+| P0 安全 | 10 | 0 | 10 |
+| P1 功能 | 13 | 0 | 13 |
+| P2 质量 | 30 | +30 | 60 |
+| P3 性能 | 8 | +1 | 9 |
+| P4 规范 | 14 | +8 | 22 |
+| **合计** | **75** | **+39** | **114** |

@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -50,3 +51,25 @@ async def update_me(
     await db.commit()
     await db.refresh(current_user)
     return UserResponse.model_validate(current_user)
+
+
+@router.post("/me/checkin")
+async def checkin(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    today_str = date.today().isoformat()
+    last_checkin = current_user.updated_at
+    if last_checkin and last_checkin.date() == date.today():
+        return {"status": "already_checked_in", "streak_days": current_user.streak_days}
+
+    yesterday = date.today().toordinal() - 1
+    if last_checkin and last_checkin.date().toordinal() == yesterday:
+        current_user.streak_days = (current_user.streak_days or 0) + 1
+    else:
+        current_user.streak_days = 1
+
+    current_user.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(current_user)
+    return {"status": "success", "streak_days": current_user.streak_days}

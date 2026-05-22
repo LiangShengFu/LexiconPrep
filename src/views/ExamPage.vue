@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '@/api/client'
 
 interface Question {
@@ -18,11 +18,27 @@ const questions = ref<Question[]>([])
 const answers = ref<Record<string, string>>({})
 const feedback = ref<Record<string, { correct: boolean; analysis: string | null }>>({})
 const currentIndex = ref(0)
+const sheetOpen = ref(false)
 const timeElapsed = ref(0)
 const loading = ref(false)
 const error = ref('')
 
-const subjects = ['政治', '英语', '数学']
+const subjects = ref<string[]>([])
+const loadingSubjects = ref(false)
+
+const fetchSubjects = async () => {
+  loadingSubjects.value = true
+  try {
+    const { data } = await api.get('/questions/subjects')
+    subjects.value = data
+  } catch {
+    subjects.value = ['政治', '英语', '数学']
+  } finally {
+    loadingSubjects.value = false
+  }
+}
+
+onMounted(() => { fetchSubjects() })
 
 const totalQuestions = computed(() => questions.value.length)
 const answeredCount = computed(() => Object.keys(answers.value).length)
@@ -136,7 +152,7 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
         </div>
       </div>
 
-      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 pb-16 lg:pb-0">
         <!-- Question Canvas -->
         <div class="lg:col-span-3 card-xai flex flex-col">
           <div class="flex items-center gap-3 mb-6">
@@ -147,10 +163,12 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
 
           <p class="text-ink text-lg font-normal leading-relaxed mb-8">{{ currentQuestion.content }}</p>
 
-          <div class="space-y-3">
+          <div class="space-y-3" role="radiogroup" :aria-label="'第' + (currentIndex + 1) + '题选项'">
             <button
               v-for="(opt, idx) in currentQuestion.options"
               :key="idx"
+              role="radio"
+              :aria-checked="answers[currentQuestion.id] === optionLabel(idx)"
               class="w-full text-left px-5 py-3 rounded-card border text-sm font-normal transition-colors"
               :class="answers[currentQuestion.id] === optionLabel(idx)
                 ? feedback[currentQuestion.id]
@@ -181,8 +199,11 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
           </div>
         </div>
 
-        <!-- Answer Sheet -->
-        <div class="card-xai">
+        <!-- Answer Sheet (floating bottom on mobile, sidebar on desktop) -->
+        <div class="fixed bottom-0 left-0 right-0 z-50 lg:static lg:z-auto rounded-t-2xl lg:rounded-card border-t lg:border border-hairline bg-white dark:bg-gray-900 p-4 lg:p-6 shadow-lg lg:shadow-none transition-transform duration-300 max-h-[60vh] lg:max-h-none overflow-y-auto" :class="sheetOpen ? 'translate-y-0' : 'translate-y-[calc(100%-40px)] lg:translate-y-0'">
+          <div class="flex items-center justify-center lg:hidden mb-2 cursor-pointer" @click="sheetOpen = !sheetOpen">
+            <div class="w-10 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+          </div>
           <p class="eyebrow-mono-sm text-mute mb-4">答题卡</p>
           <div class="grid grid-cols-5 gap-2">
             <button

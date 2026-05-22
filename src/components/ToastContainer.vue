@@ -5,7 +5,7 @@ const ui = useUiStore()
 </script>
 
 <template>
-  <div class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2">
+  <div class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2" role="alert" aria-live="polite">
     <div
       v-for="toast in ui.toasts"
       :key="toast.id"

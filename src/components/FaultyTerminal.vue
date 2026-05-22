@@ -197,6 +197,20 @@ const props = withDefaults(defineProps<FaultyTerminalProps>(), {
   pageLoadAnimation: true, brightness: 1, className: '', style: () => ({}),
 })
 
+const isLowEnd = ref(false)
+
+const detectLowEnd = () => {
+  const canvas = document.createElement('canvas')
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+  if (!gl) { isLowEnd.value = true; return }
+  const dbg = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info')
+  if (dbg) {
+    const renderer = (gl as WebGLRenderingContext).getParameter(dbg.UNMASKED_RENDERER_WEBGL)
+    if (/swiftshader|llvmpipe|mesa/i.test(renderer.toLowerCase())) isLowEnd.value = true
+  }
+  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) isLowEnd.value = true
+}
+
 const containerRef = useTemplateRef('containerRef')
 const rendererRef = ref<Renderer | null>(null)
 const mouseRef = ref({ x: 0.5, y: 0.5 })
@@ -288,7 +302,7 @@ const setup = () => {
     loadAnimationStartRef.value = 0; timeOffsetRef.value = Math.random() * 100
   }
 }
-onMounted(() => { if (containerRef.value) setup() })
+onMounted(() => { detectLowEnd(); if (containerRef.value && !isLowEnd.value) setup() })
 onBeforeUnmount(() => { if (cleanup) { cleanup(); cleanup = null } })
 watch(() => props, () => { if (cleanup) { cleanup(); cleanup = null }; setup() }, { deep: true })
 </script>

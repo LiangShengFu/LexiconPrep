@@ -2,12 +2,13 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete as sa_delete
 
 from app.core.database import get_db
 from app.models.user import User
 from app.models.question import Question
 from app.models.study_log import StudyLog
+from app.models.mistake import Mistake
 from app.api.deps import get_admin_user
 from app.core.utils import escape_search
 from app.schemas.user import UserListResponse, UserRoleUpdate
@@ -78,6 +79,8 @@ async def admin_delete_question(
     question = result.scalar_one_or_none()
     if not question:
         raise HTTPException(status_code=404, detail="题目不存在")
+    await db.execute(sa_delete(Mistake).where(Mistake.question_id == question_id))
+    await db.execute(sa_delete(StudyLog).where(StudyLog.question_id == question_id))
     await db.delete(question)
     await db.commit()
     return {"status": "success"}
@@ -108,6 +111,8 @@ async def admin_update_user_role(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="不能修改自己的角色")
     user.role = data.role
     await db.commit()
     return {"status": "success"}

@@ -69,7 +69,7 @@ const timeAgo = (dateStr: string) => {
           <!-- New Post -->
           <div class="card-xai space-y-3">
             <textarea v-model="newContent" placeholder="分享你的学习心得..." rows="2"
-              class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink resize-none" />
+              class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink resize-none max-h-[120px]" />
             <div class="flex items-center justify-between">
               <input v-model="newSubject" placeholder="标签（如：考研经验）" class="bg-canvas-soft border border-hairline rounded-card px-3 py-1.5 text-ink text-xs placeholder:text-mute focus:outline-none focus:border-ink w-40" />
               <button class="btn-pill-filled cursor-target text-sm" :disabled="posting || !newContent.trim()" @click="createPost">

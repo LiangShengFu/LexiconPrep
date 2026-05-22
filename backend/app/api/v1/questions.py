@@ -14,6 +14,14 @@ from app.schemas.question import QuestionResponse, AnswerRequest, AnswerResponse
 router = APIRouter(prefix="/questions", tags=["questions"])
 
 
+@router.get("/subjects")
+async def list_subjects(
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Question.subject).distinct().order_by(Question.subject))
+    return [row[0] for row in result.all()]
+
+
 @router.get("", response_model=list[QuestionResponse])
 async def list_questions(
     subject: str | None = Query(None),
@@ -84,7 +92,7 @@ async def submit_answer(
         if not prev_correct.scalar_one_or_none():
             current_user.total_knowledge_points = (current_user.total_knowledge_points or 0) + 1
 
-    # Auto-capture mistake
+    # Auto-capture mistake / mark mastered
     if not is_correct:
         existing = await db.execute(
             select(Mistake).where(Mistake.user_id == current_user.id, Mistake.question_id == question_id)
@@ -92,6 +100,7 @@ async def submit_answer(
         mistake = existing.scalar_one_or_none()
         if mistake:
             mistake.wrong_count += 1
+            mistake.mastered = False
             mistake.last_review_at = datetime.utcnow()
             intervals = [1, 3, 7, 14, 30]
             days = intervals[min(mistake.wrong_count - 1, len(intervals) - 1)]
@@ -104,6 +113,14 @@ async def submit_answer(
                 next_review_at=datetime.utcnow() + timedelta(days=1),
             )
             db.add(mistake)
+    else:
+        existing = await db.execute(
+            select(Mistake).where(Mistake.user_id == current_user.id, Mistake.question_id == question_id)
+        )
+        mistake = existing.scalar_one_or_none()
+        if mistake and not mistake.mastered:
+            mistake.mastered = True
+            mistake.last_review_at = datetime.utcnow()
 
     await db.commit()
     return AnswerResponse(
