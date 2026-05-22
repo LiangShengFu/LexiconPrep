@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 interface User { id: string; email: string; nickname: string; role: string; streak_days: number; total_knowledge_points: number; created_at: string }
@@ -11,14 +12,20 @@ onMounted(async () => {
   try {
     const { data } = await api.get('/admin/users')
     users.value = data
-  } catch { /* */ }
-  finally { loading.value = false }
+  } catch {
+    useUiStore().addToast('加载用户列表失败', 'error')
+  } finally { loading.value = false }
 })
 
 const toggleRole = async (user: User) => {
   const newRole = user.role === 'admin' ? 'user' : 'admin'
-  await api.put(`/admin/users/${user.id}/role`, { role: newRole })
-  user.role = newRole
+  try {
+    await api.put(`/admin/users/${user.id}/role`, { role: newRole })
+    user.role = newRole
+    useUiStore().addToast(`已将 ${user.nickname} 角色切换为 ${newRole === 'admin' ? '管理员' : '普通用户'}`, 'success')
+  } catch {
+    useUiStore().addToast('角色切换失败', 'error')
+  }
 }
 </script>
 

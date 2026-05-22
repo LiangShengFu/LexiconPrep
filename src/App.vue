@@ -19,16 +19,16 @@ const isAdminPage = computed(() => route.path.startsWith('/admin'))
 </script>
 
 <template>
-  <NavBar v-if="isMarketingPage" />
+  <template v-if="isMarketingPage">
+    <NavBar />
+    <ErrorBoundary><router-view /></ErrorBoundary>
+  </template>
   <AdminShell v-else-if="isAdminPage">
     <ErrorBoundary><router-view /></ErrorBoundary>
   </AdminShell>
   <AppShell v-else>
     <ErrorBoundary><router-view /></ErrorBoundary>
   </AppShell>
-  <div v-if="isMarketingPage">
-    <ErrorBoundary><router-view /></ErrorBoundary>
-  </div>
   <TargetCursor :spin-duration="2" :hide-default-cursor="true" />
   <ToastContainer />
 </template>

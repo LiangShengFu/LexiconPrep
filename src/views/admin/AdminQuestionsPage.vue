@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 interface Question { id: string; type: string; content: string; options: string[]; answer: string[]; subject: string; difficulty: number; chapter: string | null }
@@ -16,12 +17,17 @@ const saving = ref(false)
 
 const load = async () => {
   loading.value = true
-  const params: any = { limit: 100 }
-  if (search.value) params.search = search.value
-  if (filterSubject.value) params.subject = filterSubject.value
-  const { data } = await api.get('/admin/questions', { params })
-  questions.value = data
-  loading.value = false
+  try {
+    const params: any = { limit: 100 }
+    if (search.value) params.search = search.value
+    if (filterSubject.value) params.subject = filterSubject.value
+    const { data } = await api.get('/admin/questions', { params })
+    questions.value = data
+  } catch {
+    useUiStore().addToast('加载题目失败', 'error')
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(load)
@@ -51,13 +57,22 @@ const save = async () => {
     }
     showEdit.value = false
     await load()
-  } catch { /* */ }
+    useUiStore().addToast('保存成功', 'success')
+  } catch {
+    useUiStore().addToast('保存失败', 'error')
+  }
   finally { saving.value = false }
 }
 
 const deleteQuestion = async (id: string) => {
-  await api.delete(`/admin/questions/${id}`)
-  await load()
+  if (!confirm('确定删除该题目？关联的错题和学习记录也会被删除。')) return
+  try {
+    await api.delete(`/admin/questions/${id}`)
+    await load()
+    useUiStore().addToast('已删除', 'success')
+  } catch {
+    useUiStore().addToast('删除失败', 'error')
+  }
 }
 </script>
 

@@ -106,7 +106,10 @@ onMounted(async () => {
     </div>
 
     <div v-if="loading" class="text-mute text-sm py-12 text-center">加载中...</div>
-    <div v-else-if="error" class="card-xai text-center py-12 text-red-400">{{ error }}</div>
+    <div v-else-if="error" class="card-xai text-center py-12">
+      <p class="text-red-400 mb-4">{{ error }}</p>
+      <button class="btn-pill-outline cursor-target text-sm" @click="() => { error = ''; loading = true; onMounted() }">重试</button>
+    </div>
     <template v-else>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div v-for="s in stats" :key="s.label" class="card-xai">

@@ -19,6 +19,8 @@ limiter = Limiter(key_func=get_remote_address, default_limits=[f"{settings.RATE_
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.APP_NAME}")
+    if settings.JWT_SECRET_KEY == "change-me-in-production-use-a-real-secret":
+        logger.warning("⚠️  JWT_SECRET_KEY is using the default value! Change it in .env for production.")
     yield
     logger.info(f"Shutting down {settings.APP_NAME}")
 

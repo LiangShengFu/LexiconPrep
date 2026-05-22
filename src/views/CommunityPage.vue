@@ -21,8 +21,9 @@ const load = async () => {
     ])
     posts.value = p.data
     leaders.value = l.data
-  } catch { /* */ }
-  finally { loading.value = false }
+  } catch {
+    useUiStore().addToast('加载社区数据失败', 'error')
+  } finally { loading.value = false }
 }
 
 onMounted(load)
@@ -35,15 +36,20 @@ const createPost = async () => {
     newContent.value = ''
     newSubject.value = ''
     await load()
-  } catch { /* */ }
-  finally { posting.value = false }
+    useUiStore().addToast('发布成功', 'success')
+  } catch {
+    useUiStore().addToast('发布失败', 'error')
+  } finally { posting.value = false }
 }
 
 const likePost = async (post: Post) => {
+  const prevLikes = post.likes
   try {
     const { data } = await api.post(`/community/posts/${post.id}/like`)
     post.likes = data.likes
-  } catch { useUiStore().addToast('点赞失败', 'error') }
+  } catch {
+    useUiStore().addToast('点赞失败', 'error')
+  }
 }
 
 const timeAgo = (dateStr: string) => {

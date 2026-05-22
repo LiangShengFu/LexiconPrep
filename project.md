@@ -1,752 +1,511 @@
-# LexiconPrep 考研备考平台 - 技术设计文档
+# LexiconPrep — 项目总览
+
+> 考研备考平台 | 暗黑终端风格 | WebGL 矩阵背景 | 逐字解密动画
 
 ---
 
-## 目录
+## 1. 项目简介
 
-1. [项目概述](#1-项目概述)
-   - 1.1 项目背景
-   - 1.2 项目目标
-   - 1.3 项目范围
+**LexiconPrep** 是一款面向考研学子的学情管理与备考平台。采用暗黑打字机/终端美学设计，WebGL 矩阵雨背景 + 自定义十字光标 + 逐字解密标题动画，营造沉浸式学习氛围。
 
-2. [技术栈选型](#2-技术栈选型)
-   - 2.1 前端技术栈
-   - 2.2 后端技术栈
-   - 2.3 数据库选择
-   - 2.4 开发工具与环境配置
-
-3. [系统架构设计](#3-系统架构设计)
-   - 3.1 整体架构图
-   - 3.2 核心模块划分
-   - 3.3 模块间交互流程
-
-4. [数据库设计](#4-数据库设计)
-   - 4.1 ER图
-   - 4.2 主要数据表结构
-
-5. [API接口设计](#5-api接口设计)
-   - 5.1 RESTful API规范
-   - 5.2 主要接口定义
-
-6. [前端UI/UX设计](#6-前端uiux设计)
-   - 6.1 页面布局
-   - 6.2 主要组件设计
-   - 6.3 交互流程
-
-7. [安全策略](#7-安全策略)
-   - 7.1 认证授权机制
-   - 7.2 数据加密方案
-   - 7.3 防攻击措施
-
-8. [部署方案](#8-部署方案)
-   - 8.1 环境配置
-   - 8.2 部署流程
-
-9. [项目进度计划](#9-项目进度计划)
-   - 9.1 里程碑规划
-   - 9.2 时间线
-
-10. [风险评估与应对策略](#10-风险评估与应对策略)
+核心功能：智能题库、错题本（间隔重复）、闪卡复习、番茄钟专注、社区互动、管理后台。
 
 ---
 
-## 1. 项目概述
+## 2. 技术栈
 
-### 1.1 项目背景
+### 前端
 
-**LexiconPrep** 是一款专为考研学子打造的高端学情管理与备考平台。针对考研备考周期长、压力大、知识点细碎的痛点，通过科学的数据可视化与沉浸式的交互设计，帮助用户建立秩序感，缓解备考焦虑，提升复习效率。
+| 分类 | 技术 | 版本 | 说明 |
+|------|------|------|------|
+| 框架 | Vue.js | 3.5+ | Composition API + TypeScript |
+| 构建 | Vite | 6.x | 开发服务器 + 生产构建 |
+| UI 框架 | Element Plus | 2.9+ | 深度暗色主题定制 |
+| 状态管理 | Pinia | 2.3+ | authStore + uiStore |
+| 路由 | Vue Router | 4.5+ | 15 条路由 + 守卫 |
+| 图表 | Chart.js | 4.4+ | 折线/柱状/雷达/环形图 |
+| 样式 | Tailwind CSS | 3.4+ | xAI 暗色设计 token |
+| 动画 | GSAP | 3.15+ | 页面过渡与微交互 |
+| WebGL | ogl | 1.0+ | 终端矩阵背景特效 |
+| HTTP | Axios | 1.16+ | JWT 自动注入 + 401 拦截 + Token 刷新队列 |
 
-### 1.2 项目目标
+### 后端
 
-| 目标类型 | 描述 |
-|---------|------|
-| **用户体验** | 提供极简、清爽的学习界面，减少视觉疲劳 |
-| **功能目标** | 实现智能题库、错题本、闪卡复习、真题模拟等核心功能 |
-| **数据目标** | 通过数据分析提供学情洞察和学习建议 |
-| **性能目标** | 首屏加载时间 < 2s，交互响应 < 500ms |
-
-### 1.3 项目范围
-
-**核心功能模块：**
-- 智能仪表盘（Dashboard）
-- 资源库与搜索（Library）
-- 专注做题模式（Exam Simulator）
-- 错题本管理（Mistake Bank）
-- 闪卡复习（Flashcards）
-- 学习进度追踪（Progress）
-- 学友社区（Community）
-
-**非功能范围：**
-- 暂不支持实时视频课程
-- 暂不支持在线支付功能
-
----
-
-## 2. 技术栈选型
-
-### 2.1 前端技术栈
-
-| 分类 | 技术 | 版本 | 选型理由 |
-|------|------|------|----------|
-| 框架 | Vue.js | 3.x | 响应式设计、组合式API、性能优异 |
-| UI框架 | Element Plus | 2.x | 丰富组件库、完善的设计系统 |
-| 状态管理 | Pinia | 2.x | Vue官方推荐、轻量级、类型安全 |
-| 路由 | Vue Router | 4.x | Vue官方路由、支持动态路由 |
-| 图表库 | Chart.js | 4.x | 轻量级、响应式、丰富的图表类型 |
-| 样式 | Tailwind CSS | 3.x | 原子化CSS、快速开发、设计系统友好 |
-| 图标 | Material Icons | - | Google官方图标库、丰富多样 |
-
-### 2.2 后端技术栈
-
-| 分类 | 技术 | 版本 | 选型理由 |
-|------|------|------|----------|
-| 语言 | Python | 3.11+ | 简洁语法、丰富的数据处理库、AI友好 |
-| 框架 | FastAPI | 0.100+ | 高性能、自动API文档、类型安全 |
-| ORM | SQLAlchemy | 2.x | 强大的ORM工具、支持多种数据库 |
-| 异步支持 | Asyncio | - | Python原生异步支持 |
-| API文档 | Swagger UI | - | 自动生成交互式API文档 |
-
-### 2.3 数据库选择
-
-| 数据库类型 | 技术 | 版本 | 用途 |
-|-----------|------|------|------|
-| 主数据库 | PostgreSQL | 16.x | 关系型数据存储、ACID事务支持 |
-| 缓存 | Redis | 7.x | 会话管理、热点数据缓存 |
-| 全文搜索 | PostgreSQL + pg_trgm | - | 知识点、题目搜索 |
-
-### 2.4 开发工具与环境配置
-
-| 工具 | 用途 |
-|------|------|
-| Docker | 容器化部署、环境一致性 |
-| Docker Compose | 多容器编排 |
-| Git | 版本控制 |
-| GitHub Actions | CI/CD自动化 |
-| Prettier | 代码格式化 |
-| ESLint | 代码质量检查 |
-| Pytest | 后端单元测试 |
-| Vitest | 前端单元测试 |
+| 分类 | 技术 | 版本 | 说明 |
+|------|------|------|------|
+| 语言 | Python | 3.12+ | 类型注解 + async/await |
+| 框架 | FastAPI | 0.115+ | 自动 API 文档 + 高性能 |
+| ORM | SQLAlchemy | 2.0+ | 异步 ORM + mapped_column |
+| 数据库 | PostgreSQL | 16+ | 生产环境（开发可用 SQLite） |
+| 缓存 | Redis | 7.x | 已配置但未深度集成 |
+| 认证 | python-jose + passlib | - | JWT + bcrypt |
+| 限流 | slowapi | - | 登录 5 次/分钟 + 全局 60 次/分钟 |
+| 迁移 | Alembic | 1.14+ | 目录已创建，待初始化迁移脚本 |
 
 ---
 
-## 3. 系统架构设计
-
-### 3.1 整体架构图
+## 3. 项目结构
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        前端层 (Frontend)                            │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌───────────┐  │
-│  │  Dashboard   │ │   Library    │ │  Exam        │ │  Community│  │
-│  │   仪表盘     │ │    资源库    │ │  Simulator   │ │   社区    │  │
-│  └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └─────┬─────┘  │
-│         │                │                │                │        │
-└─────────┼────────────────┼────────────────┼────────────────┼────────┘
-          │                │                │                │
-          ▼                ▼                ▼                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        API网关层 (API Gateway)                      │
-│                  CORS处理 | 认证校验 | 请求限流                      │
-└────────────────────────────────────────┬────────────────────────────┘
-                                         │
-          ┌──────────────────────────────┼──────────────────────────────┐
-          │                              │                              │
-          ▼                              ▼                              ▼
-┌───────────────────┐      ┌───────────────────┐      ┌───────────────────┐
-│    用户服务       │      │    学习服务       │      │    内容服务       │
-│  User Service     │      │  Learning Service │      │  Content Service  │
-│  - 用户认证       │      │  - 题库管理       │      │  - 资源管理       │
-│  - 个人信息       │      │  - 错题本         │      │  - 闪卡系统       │
-│  - 学习计划       │      │  - 进度追踪       │      │  - 真题下载       │
-└───────────────────┘      └───────────────────┘      └───────────────────┘
-          │                              │                              │
-          └──────────────────────────────┼──────────────────────────────┘
-                                         │
-                                         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        数据层 (Data Layer)                          │
-│  ┌───────────────────┐    ┌───────────────────┐    ┌─────────────┐   │
-│  │   PostgreSQL      │    │      Redis        │    │   File      │   │
-│  │  (关系型数据)     │    │   (缓存/会话)     │    │  Storage    │   │
-│  └───────────────────┘    └───────────────────┘    └─────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### 3.2 核心模块划分
-
-| 模块名称 | 职责描述 | 核心功能 |
-|---------|---------|----------|
-| **用户服务** | 用户认证与管理 | 注册、登录、个人信息、学习计划 |
-| **学习服务** | 学习行为管理 | 题库、错题本、进度追踪、数据分析 |
-| **内容服务** | 学习资源管理 | 资源库、闪卡系统、真题下载 |
-| **社区服务** | 社交功能 | 学友动态、学习小组 |
-
-### 3.3 模块间交互流程
-
-#### 用户登录流程
-```
-用户 → 前端 → API网关 → 用户服务 → PostgreSQL → 返回用户信息 → 前端
-```
-
-#### 做题流程
-```
-用户 → 前端(Exam Simulator) → API网关 → 学习服务 → PostgreSQL(题目) → 返回题目 → 前端
-用户答题 → 提交答案 → 学习服务 → PostgreSQL(记录答题) → 返回结果 → 前端
+├── index.html                  # 入口 HTML（SEO meta + 字体 CDN）
+├── env.d.ts                    # TypeScript 环境类型声明
+├── tsconfig.json               # TS 严格模式（strict + noUnused）
+├── package.json                # 前端依赖
+├── docker-compose.yml          # PostgreSQL + Redis 编排
+├── Dockerfile.frontend         # 前端容器
+├── src/
+│   ├── main.ts                 # Vue 入口
+│   ├── App.vue                 # 根组件（布局切换：营销页/管理后台/应用内页）
+│   ├── router/index.ts         # 15 条路由 + 认证守卫 + 管理员守卫
+│   ├── stores/
+│   │   ├── auth.ts             # 认证状态（login/register/logout/initFromStorage）
+│   │   └── ui.ts               # Toast 通知系统
+│   ├── api/client.ts           # Axios 实例（JWT 注入 + Token 刷新队列 + 错误 Toast）
+│   ├── styles/                 # Tailwind + xAI 暗色主题变量
+│   ├── components/
+│   │   ├── NavBar.vue          # 顶部导航栏（营销页）
+│   │   ├── AppShell.vue        # 应用内页布局（侧边栏 + 主内容）
+│   │   ├── AdminShell.vue      # 管理后台布局
+│   │   ├── FaultyTerminal.vue  # WebGL 终端矩阵背景
+│   │   ├── TargetCursor.vue    # 自定义十字光标
+│   │   ├── DecryptedText.vue   # 逐字解密动画
+│   │   ├── ToastContainer.vue  # 全局 Toast 通知
+│   │   ├── ErrorBoundary.vue   # 错误边界
+│   │   ├── SkeletonLoader.vue  # 骨架屏
+│   │   └── PomodoroTimer.vue   # 番茄钟悬浮组件
+│   └── views/
+│       ├── LandingPage.vue     # 首页（Hero + Bento Grid）
+│       ├── LoginPage.vue       # 登录
+│       ├── RegisterPage.vue    # 注册
+│       ├── ProfilePage.vue     # 个人主页（日历打卡 + 信息编辑）
+│       ├── LibraryPage.vue     # 资源库 + 错题本
+│       ├── ExamPage.vue        # 做题模式
+│       ├── FlashcardsPage.vue  # 闪卡复习
+│       ├── ProgressPage.vue    # 学习进度
+│       ├── CommunityPage.vue   # 社区
+│       ├── PomodoroPage.vue    # 番茄钟全屏
+│       ├── DashboardPage.vue   # [已废弃] 重定向到 /profile
+│       ├── SettingsPage.vue    # [已废弃] 重定向到 /profile
+│       └── admin/
+│           ├── AdminOverviewPage.vue   # 管理概览
+│           ├── AdminQuestionsPage.vue  # 题目 CRUD
+│           └── AdminUsersPage.vue      # 用户管理
+├── backend/
+│   ├── app/
+│   │   ├── main.py             # FastAPI 入口（CORS + 限流 + 日志中间件）
+│   │   ├── core/
+│   │   │   ├── config.py       # Settings（pydantic-settings + .env）
+│   │   │   ├── database.py     # 异步引擎 + 连接池 + 会话管理
+│   │   │   ├── security.py     # JWT + bcrypt
+│   │   │   └── utils.py        # escape_search（防通配符注入）
+│   │   ├── api/
+│   │   │   ├── deps.py         # get_current_user + get_admin_user
+│   │   │   └── v1/
+│   │   │       ├── router.py   # API 路由汇总
+│   │   │       ├── auth.py     # 注册/登录/刷新 Token
+│   │   │       ├── users.py    # 用户信息/密码修改/打卡
+│   │   │       ├── questions.py # 题目列表/答题/自动录入错题
+│   │   │       ├── mistakes.py  # 错题列表/删除/复习
+│   │   │       ├── flashcards.py # 闪卡 CRUD + 复习
+│   │   │       ├── resources.py # 资源列表/详情
+│   │   │       ├── stats.py    # 学习统计（实时 DB 查询）
+│   │   │       ├── community.py # 发帖/点赞/删除/排行榜
+│   │   │       └── admin.py    # 管理后台（题目 CRUD + 用户管理 + 统计）
+│   │   ├── models/             # 8 个模型
+│   │   │   ├── user.py         # User（含 role 字段）
+│   │   │   ├── question.py     # Question（含 subject 索引）
+│   │   │   ├── mistake.py      # Mistake（含 mastered 字段）
+│   │   │   ├── flashcard.py    # Flashcard
+│   │   │   ├── resource.py     # Resource
+│   │   │   ├── study_log.py    # StudyLog
+│   │   │   ├── community.py    # CommunityPost
+│   │   │   └── post_like.py    # PostLike（联合唯一约束）
+│   │   └── schemas/            # Pydantic 模型
+│   │       ├── user.py         # 含 PasswordChange 复杂度校验
+│   │       ├── question.py     # 含 QuestionCreate/Update
+│   │       ├── community.py    # 含 max_length=2000
+│   │       ├── mistake.py
+│   │       ├── flashcard.py
+│   │       └── resource.py
+│   ├── init_db.py              # 建表脚本
+│   ├── seed.py                 # 种子数据（30 题 + 12 资源 + 2 用户 + 4 帖子）
+│   ├── Dockerfile              # 后端容器
+│   ├── .env.example            # 环境变量模板
+│   └── requirements.txt        # Python 依赖
+├── project.md                  # 本文档
+├── list.md                     # 功能清单
+├── design.md                   # 技术设计文档
+├── problems.md                 # 问题清单
+└── README.md                   # 快速启动指南
 ```
 
 ---
 
-## 4. 数据库设计
+## 4. 数据库模型
 
-### 4.1 ER图
+### 4.1 ER 关系
 
 ```
-┌───────────┐     1:N     ┌───────────┐     N:M     ┌───────────┐
-│   User    │◄───────────│  Question │───────────►│   Tag     │
-├───────────┤             ├───────────┤             ├───────────┤
-│ id        │             │ id        │             │ id        │
-│ email     │             │ content   │             │ name      │
-│ password  │             │ options   │             └───────────┘
-│ nickname  │             │ answer    │
-│ avatar    │             │ difficulty│     N:M     ┌───────────┐
-└───────────┘             │ tag_ids   │◄───────────│   Exam    │
-       │                  └───────────┘             ├───────────┤
-       │                                           │ id        │
-       │ 1:N                                       │ name      │
-       ▼                                           │ duration  │
-┌───────────┐     1:N     ┌───────────┐             │ question_ids│
-│ StudyLog  │◄───────────│ Mistake   │             └───────────┘
-├───────────┤             ├───────────┤
-│ id        │             │ id        │
-│ user_id   │             │ user_id   │
-│ question_id│            │ question_id│
-│ answer    │             │ wrong_count│
-│ is_correct│            │ last_review│
-│ timestamp │            └───────────┘
-└───────────┘
+User 1──N StudyLog       User 1──N Mistake        User 1──N Flashcard
+User 1──N CommunityPost  User 1──N PostLike
+
+Question 1──N StudyLog   Question 1──N Mistake
+
+CommunityPost 1──N PostLike
 ```
 
-### 4.2 主要数据表结构
+### 4.2 表结构
 
-#### 4.2.1 users 表（用户表）
+#### users
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | UUID | PRIMARY KEY | 用户唯一标识 |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 用户唯一标识 |
 | email | VARCHAR(255) | UNIQUE, NOT NULL | 邮箱 |
-| password_hash | VARCHAR(255) | NOT NULL | 密码哈希 |
+| password_hash | VARCHAR(255) | NOT NULL | bcrypt 加密 |
 | nickname | VARCHAR(50) | NOT NULL | 昵称 |
-| avatar | VARCHAR(255) | NULL | 头像URL |
-| streak_days | INT | DEFAULT 0 | 连续学习天数 |
-| total_knowledge_points | INT | DEFAULT 0 | 已掌握知识点数 |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
-| updated_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 更新时间 |
+| avatar | TEXT | NULL | base64 头像（≤500KB） |
+| role | VARCHAR(20) | DEFAULT 'user' | 角色（user/admin） |
+| streak_days | INT | DEFAULT 0 | 连续打卡天数 |
+| total_knowledge_points | INT | DEFAULT 0 | 已掌握知识点（去重计数） |
+| created_at | TIMESTAMP | DEFAULT now() | 创建时间 |
+| updated_at | TIMESTAMP | DEFAULT now() | 更新时间 |
 
-#### 4.2.2 questions 表（题目表）
+#### questions
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | UUID | PRIMARY KEY | 题目唯一标识 |
-| type | VARCHAR(20) | NOT NULL | 题型(SINGLE/MULTIPLE/JUDGE) |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 题目唯一标识 |
+| type | VARCHAR(20) | NOT NULL | SINGLE/MULTIPLE/JUDGE |
 | content | TEXT | NOT NULL | 题目内容 |
-| options | JSONB | NOT NULL | 选项(JSON数组) |
-| answer | JSONB | NOT NULL | 正确答案(JSON数组) |
+| options | JSONB | NOT NULL | 选项（list[str]） |
+| answer | JSONB | NOT NULL | 正确答案（list[str]） |
 | analysis | TEXT | NULL | 答案解析 |
-| difficulty | INT | DEFAULT 1 | 难度(1-5) |
-| subject | VARCHAR(50) | NOT NULL | 学科分类 |
+| difficulty | INT | DEFAULT 1 | 难度 1-5 |
+| subject | VARCHAR(50) | NOT NULL, INDEX | 学科分类 |
 | chapter | VARCHAR(100) | NULL | 章节 |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
+| created_at | TIMESTAMP | DEFAULT now() | 创建时间 |
 
-#### 4.2.3 study_logs 表（学习记录表）
+#### study_logs
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | UUID | PRIMARY KEY | 记录唯一标识 |
-| user_id | UUID | FOREIGN KEY | 用户ID |
-| question_id | UUID | FOREIGN KEY | 题目ID |
-| user_answer | JSONB | NOT NULL | 用户答案 |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 记录唯一标识 |
+| user_id | UUID | FK → users, INDEX | 用户 ID |
+| question_id | UUID | FK → questions | 题目 ID |
+| user_answer | VARCHAR(500) | NOT NULL | 用户答案（逗号分隔排序） |
 | is_correct | BOOLEAN | NOT NULL | 是否正确 |
-| time_spent | INT | DEFAULT 0 | 答题耗时(秒) |
-| timestamp | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 答题时间 |
+| time_spent | INT | DEFAULT 0 | 答题耗时（秒） |
+| timestamp | TIMESTAMP | DEFAULT now() | 答题时间 |
 
-#### 4.2.4 mistakes 表（错题本表）
+#### mistakes
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | UUID | PRIMARY KEY | 记录唯一标识 |
-| user_id | UUID | FOREIGN KEY | 用户ID |
-| question_id | UUID | FOREIGN KEY | 题目ID |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 记录唯一标识 |
+| user_id | UUID | FK → users, INDEX | 用户 ID |
+| question_id | UUID | FK → questions | 题目 ID |
 | wrong_count | INT | DEFAULT 1 | 错误次数 |
+| review_count | INT | DEFAULT 0 | 复习次数 |
+| mastered | BOOLEAN | DEFAULT FALSE | 是否已掌握 |
 | last_review_at | TIMESTAMP | NULL | 最后复习时间 |
 | next_review_at | TIMESTAMP | NOT NULL | 下次复习时间 |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
+| created_at | TIMESTAMP | DEFAULT now() | 创建时间 |
 
-#### 4.2.5 flashcards 表（闪卡表）
+#### flashcards
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | UUID | PRIMARY KEY | 闪卡唯一标识 |
-| user_id | UUID | FOREIGN KEY | 用户ID |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 闪卡唯一标识 |
+| user_id | UUID | FK → users | 用户 ID |
 | front | TEXT | NOT NULL | 正面内容 |
 | back | TEXT | NOT NULL | 背面内容 |
 | subject | VARCHAR(50) | NULL | 学科分类 |
-| difficulty | INT | DEFAULT 1 | 难度(1-5) |
+| difficulty | INT | DEFAULT 1 | 难度 1-5 |
 | review_count | INT | DEFAULT 0 | 复习次数 |
 | next_review_at | TIMESTAMP | NOT NULL | 下次复习时间 |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
+| created_at | TIMESTAMP | DEFAULT now() | 创建时间 |
 
-#### 4.2.6 resources 表（资源表）
+#### resources
 
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | UUID | PRIMARY KEY | 资源唯一标识 |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 资源唯一标识 |
 | title | VARCHAR(255) | NOT NULL | 资源标题 |
 | description | TEXT | NULL | 资源描述 |
-| type | VARCHAR(20) | NOT NULL | 资源类型(PDF/VIDEO/DOC) |
-| file_url | VARCHAR(500) | NOT NULL | 文件URL |
-| size | BIGINT | NOT NULL | 文件大小(字节) |
+| type | VARCHAR(20) | NOT NULL | PDF/DOC/VIDEO |
+| file_url | VARCHAR(500) | NOT NULL | 文件 URL |
+| size | BIGINT | NOT NULL | 文件大小（字节） |
 | subject | VARCHAR(50) | NOT NULL | 学科分类 |
 | year | INT | NULL | 年份 |
 | downloads | INT | DEFAULT 0 | 下载次数 |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
+| created_at | TIMESTAMP | DEFAULT now() | 创建时间 |
+
+#### community_posts
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 帖子唯一标识 |
+| user_id | UUID | FK → users, INDEX | 作者 ID |
+| content | TEXT | NOT NULL | 帖子内容 |
+| subject | VARCHAR(50) | NULL | 学科标签 |
+| likes | INT | DEFAULT 0 | 点赞数 |
+| created_at | TIMESTAMP | DEFAULT now() | 创建时间 |
+
+#### post_likes
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | UUID | PK | 记录唯一标识 |
+| user_id | UUID | FK → users | 用户 ID |
+| post_id | UUID | FK → community_posts | 帖子 ID |
+
+联合唯一约束：`uq_post_like(user_id, post_id)`
 
 ---
 
-## 5. API接口设计
+## 5. API 接口一览
 
-### 5.1 RESTful API规范
+基础路径：`/api/v1`
 
-| 规范项 | 规则 |
-|--------|------|
-| 基础路径 | `/api/v1` |
-| 版本控制 | URI中包含版本号 |
-| HTTP方法 | GET(查询)、POST(创建)、PUT(更新)、DELETE(删除) |
-| 状态码 | 200(成功)、201(创建)、400(请求错误)、401(未授权)、403(禁止)、404(未找到)、500(服务器错误) |
-| 响应格式 | JSON格式 |
-| 错误处理 | 统一错误响应格式 |
+### 认证
 
-### 5.2 主要接口定义
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| POST | `/auth/register` | 注册（邮箱+昵称唯一性校验） | 无 |
+| POST | `/auth/login` | 登录（限流 5 次/分钟） | 无 |
+| POST | `/auth/refresh` | 刷新 Token（验证 type=refresh） | 无 |
 
-#### 5.2.1 用户认证接口
+### 用户
 
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/auth/register` | POST | 用户注册 |
-| `/api/v1/auth/login` | POST | 用户登录 |
-| `/api/v1/auth/logout` | POST | 用户登出 |
-| `/api/v1/auth/refresh` | POST | 刷新Token |
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/users/me` | 获取当前用户信息 | JWT |
+| PUT | `/users/me` | 更新昵称/头像（≤500KB, base64） | JWT |
+| PUT | `/users/me/password` | 修改密码（复杂度校验） | JWT |
+| POST | `/users/me/checkin` | 打卡（后端化，更新 streak_days） | JWT |
 
-**POST /api/v1/auth/register**
+### 题目
 
-请求体：
-```json
-{
-  "email": "string",
-  "password": "string",
-  "nickname": "string"
-}
-```
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/questions/subjects` | 获取学科列表 | 无 |
+| GET | `/questions` | 题目列表（学科/难度筛选 + 分页） | JWT |
+| GET | `/questions/{id}` | 单题详情 | JWT |
+| POST | `/questions/{id}/answer` | 提交答案 → 判对错 + 写 study_log + 自动录入/标记错题 | JWT |
 
-响应体：
-```json
-{
-  "status": "success",
-  "data": {
-    "id": "uuid",
-    "email": "string",
-    "nickname": "string",
-    "access_token": "string",
-    "refresh_token": "string"
-  }
-}
-```
+### 错题本
 
-#### 5.2.2 用户信息接口
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/mistakes` | 错题列表（仅未掌握，按下次复习日排序） | JWT |
+| DELETE | `/mistakes/{id}` | 删除错题 | JWT |
+| POST | `/mistakes/{id}/review` | 复习错题（remembered→标记已掌握，否则 wrong_count+1） | JWT |
 
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/users/me` | GET | 获取当前用户信息 |
-| `/api/v1/users/me` | PUT | 更新用户信息 |
-| `/api/v1/users/me/stats` | GET | 获取用户学习统计 |
+### 闪卡
 
-#### 5.2.3 题目接口
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/flashcards` | 闪卡列表（学科筛选 + 分页） | JWT |
+| POST | `/flashcards` | 创建闪卡 | JWT |
+| PUT | `/flashcards/{id}` | 更新闪卡 | JWT |
+| DELETE | `/flashcards/{id}` | 删除闪卡 | JWT |
+| POST | `/flashcards/{id}/review` | 复习闪卡（间隔：1→3→7→14→30→60 天） | JWT |
 
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/questions` | GET | 获取题目列表 |
-| `/api/v1/questions/{id}` | GET | 获取单题详情 |
-| `/api/v1/questions/{id}/answer` | POST | 提交答案 |
+### 资源
 
-**GET /api/v1/questions**
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/resources` | 资源列表（学科/类型/搜索 + 分页） | JWT |
+| GET | `/resources/{id}` | 资源详情 | JWT |
 
-请求参数：
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| subject | string | 否 | 学科筛选 |
-| difficulty | int | 否 | 难度筛选 |
-| limit | int | 否 | 每页数量 |
-| offset | int | 否 | 偏移量 |
+### 统计
 
-**POST /api/v1/questions/{id}/answer**
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/stats/overview` | KPI 概览（实时 DB 聚合） | JWT |
+| GET | `/stats/progress` | 10 周趋势 + 科目分布 | JWT |
+| GET | `/stats/trend` | 7 日每日做题量 | JWT |
 
-请求体：
-```json
-{
-  "user_answer": ["选项A", "选项B"],
-  "time_spent": 45
-}
-```
+### 社区
 
-响应体：
-```json
-{
-  "status": "success",
-  "data": {
-    "is_correct": true,
-    "correct_answer": ["选项A", "选项B"],
-    "analysis": "答案解析..."
-  }
-}
-```
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/community/posts` | 帖子列表 | JWT |
+| POST | `/community/posts` | 发帖（≤2000 字） | JWT |
+| POST | `/community/posts/{id}/like` | 点赞（防重复） | JWT |
+| DELETE | `/community/posts/{id}` | 删除帖子（仅作者） | JWT |
+| GET | `/community/leaderboard` | 7 日排行榜 | JWT |
 
-#### 5.2.4 错题本接口
+### 管理后台
 
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/mistakes` | GET | 获取错题列表 |
-| `/api/v1/mistakes/{id}` | DELETE | 删除错题记录 |
-| `/api/v1/mistakes/review` | POST | 复习错题 |
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/admin/questions` | 题目列表（搜索 + 分页） | Admin |
+| POST | `/admin/questions` | 创建题目 | Admin |
+| PUT | `/admin/questions/{id}` | 更新题目 | Admin |
+| DELETE | `/admin/questions/{id}` | 删除题目（级联删除 mistakes + study_logs） | Admin |
+| GET | `/admin/users` | 用户列表 | Admin |
+| PUT | `/admin/users/{id}/role` | 修改用户角色（自保护） | Admin |
+| GET | `/admin/stats` | 系统统计 | Admin |
 
-#### 5.2.5 闪卡接口
+### 健康检查
 
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/flashcards` | GET | 获取闪卡列表 |
-| `/api/v1/flashcards` | POST | 创建闪卡 |
-| `/api/v1/flashcards/{id}` | PUT | 更新闪卡 |
-| `/api/v1/flashcards/{id}` | DELETE | 删除闪卡 |
-| `/api/v1/flashcards/review` | POST | 复习闪卡 |
-
-#### 5.2.6 资源接口
-
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/resources` | GET | 获取资源列表 |
-| `/api/v1/resources/{id}` | GET | 获取资源详情 |
-| `/api/v1/resources/{id}/download` | GET | 下载资源 |
-
-#### 5.2.7 学习统计接口
-
-| API路径 | HTTP方法 | 功能描述 |
-|---------|---------|----------|
-| `/api/v1/stats/overview` | GET | 获取学习概览统计 |
-| `/api/v1/stats/progress` | GET | 获取学习进度 |
-| `/api/v1/stats/trend` | GET | 获取学习趋势 |
+| 方法 | 路径 | 功能 | 认证 |
+|------|------|------|------|
+| GET | `/health` | 服务健康检查 | 无 |
 
 ---
 
-## 6. 前端UI/UX设计
+## 6. 核心业务逻辑
 
-### 6.1 页面布局
-
-#### 6.1.1 首页（index.html）
+### 6.1 答题流程
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Top Navigation Bar                       │
-│  [Logo]  [Question Bank] [Flashcards] [Mock Tests] [Login] │
-├─────────────────────────────────────────────────────────────┤
-│                        Hero Section                         │
-│         [搜索框]                                            │
-│         专注、极简、高效的考研备考新体验                      │
-├─────────────────────────────────────────────────────────────┤
-│                   Bento Grid - 专业导览                      │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│  │   计算机    │ │    法学     │ │   经济学    │          │
-│  │    科学     │ │    硕士     │ │             │          │
-│  └─────────────┘ └─────────────┘ └─────────────┘          │
-│  ┌─────────────────────────────┐ ┌─────────────┐          │
-│  │      心理学专硕 (MAP)       │ │             │          │
-│  └─────────────────────────────┘ └─────────────┘          │
-├─────────────────────────────────────────────────────────────┤
-│                  Features Section                           │
-│  自适应题库 · 悬浮番茄钟 · 智能复习算法                        │
-├─────────────────────────────────────────────────────────────┤
-│                         Footer                              │
-│  [LexiconPrep] [Honor Code] [Terms] [Contact]              │
-└─────────────────────────────────────────────────────────────┘
+用户选择答案 → POST /questions/{id}/answer
+  → 比对答案（排序后字符串比较）
+  → 写入 study_logs
+  → 答对：检查是否首次答对 → 更新 total_knowledge_points（去重）
+  → 答对：检查是否在错题本 → 标记 mastered=True
+  → 答错：检查是否已有错题 → 有则 wrong_count+1, mastered=False → 无则新建
+  → 返回判对错 + 解析
 ```
 
-#### 6.1.2 仪表盘（dashboard.html）
+### 6.2 间隔重复
+
+错题复习和闪卡复习采用固定间隔序列（非 SM-2 算法）：
+
+| 复习次数 | 间隔天数 |
+|---------|---------|
+| 第 1 次 | 1 天 |
+| 第 2 次 | 3 天 |
+| 第 3 次 | 7 天 |
+| 第 4 次 | 14 天 |
+| 第 5 次 | 30 天 |
+| 第 6 次+ | 60 天 |
+
+忘记时重置为 1 天间隔。
+
+### 6.3 打卡系统
+
+- 后端化：`POST /users/me/checkin`
+- 同一天重复打卡返回 `already_checked_in`
+- 连续打卡：昨天有打卡 → streak_days + 1；否则重置为 1
+
+### 6.4 认证流程
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ┌───────────────┐ ┌─────────────────────────────────────┐  │
-│  │    Sidebar    │ │           Main Content              │  │
-│  │  [Dashboard]  │ │  ┌───────────────────────────────┐  │  │
-│  │  [Library]    │ │  │         KPI Cards              │  │  │
-│  │  [Exam Sim]   │ │  │  连续学习 已掌握知识点 专注时长  │  │  │
-│  │  [Progress]   │ │  └───────────────────────────────┘  │  │
-│  │  [Settings]   │ │  ┌───────────────────┐ ┌─────────┐  │  │
-│  │               │ │  │  学习进度轨迹图   │ │ 能力图谱│  │  │
-│  │  [Start Quiz] │ │  │    (折线图)       │ │ (雷达图)│  │  │
-│  └───────────────┘ │  └───────────────────┘ └─────────┘  │  │
-│                    │  ┌───────────┐ ┌─────────────────┐   │  │
-│                    │  │ 错题本洞察 │ │   资源快捷入口    │   │  │
-│                    │  └───────────┘ └─────────────────┘   │  │
-│                    └─────────────────────────────────────┘  │
-│                           │                                 │
-│                           ▼                                 │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │           Side Panel (每日打卡 / 学习计划)             │  │
-│  └───────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### 6.1.3 专注做题模式（exam.html）
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  [← 退出]                  专注做题模式                  [提交] │
-│                              [计时器]                       │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────┐ ┌───────────────┐  │
-│  │          Question Canvas            │ │   Answer      │  │
-│  │  [题目内容]                         │ │   Sheet       │  │
-│  │  ○ 选项A                           │ │               │  │
-│  │  ○ 选项B                           │ │  [1][2][3][4] │  │
-│  │  ○ 选项C                           │ │  [5][6][7][8] │  │
-│  │  ○ 选项D                           │ │  ...          │  │
-│  │                                    │ │               │  │
-│  │         [上一题] [下一题]           │ │  [已答/未答]  │  │
-│  └─────────────────────────────────────┘ └───────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 6.2 主要组件设计
-
-#### 6.2.1 Glass Panel（毛玻璃卡片）
-
-```css
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-}
-```
-
-#### 6.2.2 Progress Ring（进度环）
-
-- 用途：展示学习进度、完成率
-- 实现：SVG + CSS动画
-
-#### 6.2.3 KPI Card（关键指标卡片）
-
-| 属性 | 说明 |
-|------|------|
-| icon | Material Icons图标 |
-| label | 指标名称 |
-| value | 指标数值 |
-| unit | 单位 |
-| trend | 趋势(上升/下降/平稳) |
-
-#### 6.2.4 Question Card（题目卡片）
-
-| 属性 | 说明 |
-|------|------|
-| type | 题型标识(单选/多选/判断) |
-| content | 题目内容 |
-| options | 选项列表 |
-| selected | 已选答案 |
-| status | 状态(未答/已答/正确/错误) |
-
-### 6.3 交互流程
-
-#### 6.3.1 登录流程
-
-```
-用户访问首页 → 点击登录按钮 → 输入邮箱密码 → 提交登录请求 → 
-验证成功 → 跳转仪表盘 → 加载用户数据
-```
-
-#### 6.3.2 做题流程
-
-```
-用户进入做题模式 → 加载题目 → 选择答案 → 点击下一题 → 
-完成所有题目 → 点击提交 → 显示成绩 → 查看解析
-```
-
-#### 6.3.3 打卡流程
-
-```
-用户进入仪表盘 → 点击打卡按钮 → 显示动画效果 → 
-更新连续打卡天数 → 显示鼓励文案
+注册/登录 → 返回 access_token (15min) + refresh_token (7day)
+前端存储到 localStorage → Axios 拦截器自动注入 Authorization
+access_token 过期 → 自动调用 /auth/refresh → 请求队列等待刷新完成
+刷新失败 → 清除认证信息 → 跳转登录页
 ```
 
 ---
 
-## 7. 安全策略
+## 7. 安全措施
 
-### 7.1 认证授权机制
-
-#### 7.1.1 JWT认证
-
-- Access Token：短期令牌，有效期15分钟
-- Refresh Token：长期令牌，有效期7天，存储在HttpOnly Cookie中
-
-#### 7.1.2 权限控制
-
-| 用户角色 | 权限说明 |
-|---------|----------|
-| 普通用户 | 访问个人数据、题库、错题本、闪卡 |
-| 管理员 | 管理题目、资源、用户数据 |
-
-### 7.2 数据加密方案
-
-| 数据类型 | 加密方式 |
-|---------|----------|
-| 用户密码 | bcrypt(强度12) |
-| JWT Token | HS256算法 |
-| 传输数据 | HTTPS/TLS 1.3 |
-
-### 7.3 防攻击措施
-
-| 攻击类型 | 防护措施 |
-|---------|----------|
-| SQL注入 | 使用ORM参数化查询 |
-| XSS攻击 | 前端输入过滤、后端输出转义 |
-| CSRF攻击 | 使用CSRF Token |
-| 暴力破解 | 登录失败锁定、验证码 |
-| 接口限流 | Rate Limiting(每分钟最多100次请求) |
-
----
-
-## 8. 部署方案
-
-### 8.1 环境配置
-
-#### 8.1.1 开发环境
-
-```yaml
-# docker-compose.dev.yml
-services:
-  web:
-    build: .
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://user:pass@db:5432/lexiconprep
-      - REDIS_URL=redis://redis:6379/0
-
-  db:
-    image: postgres:16
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=lexiconprep
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=pass
-
-  redis:
-    image: redis:7
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  redis_data:
-```
-
-#### 8.1.2 生产环境
-
-- **服务器**: AWS EC2 / 阿里云ECS
-- **负载均衡**: AWS ALB / Nginx
-- **数据库**: AWS RDS PostgreSQL
-- **缓存**: AWS ElastiCache Redis
-- **存储**: AWS S3
-- **CDN**: AWS CloudFront
-
-### 8.2 部署流程
-
-```
-开发完成 → 代码提交 → GitHub Actions触发 → 
-代码检查(ESLint/Pytest) → 构建Docker镜像 → 
-推送至Docker Hub → 部署到生产环境 → 
-健康检查 → 完成部署
-```
-
----
-
-## 9. 项目进度计划
-
-### 9.1 里程碑规划
-
-| 阶段 | 时间 | 目标 |
+| 措施 | 状态 | 说明 |
 |------|------|------|
-| **Phase 1** | 第1-2周 | 项目初始化、基础架构搭建 |
-| **Phase 2** | 第3-4周 | 用户认证模块开发 |
-| **Phase 3** | 第5-6周 | 题库系统开发 |
-| **Phase 4** | 第7-8周 | 错题本、闪卡模块开发 |
-| **Phase 5** | 第9-10周 | 仪表盘、数据分析开发 |
-| **Phase 6** | 第11-12周 | 社区模块开发 |
-| **Phase 7** | 第13-14周 | 测试与Bug修复 |
-| **Phase 8** | 第15-16周 | 部署上线 |
+| JWT 认证 | ✅ 已实现 | access 15min + refresh 7day |
+| bcrypt 密码加密 | ✅ 已实现 | passlib CryptContext |
+| 登录限流 | ✅ 已实现 | slowapi 5 次/分钟 |
+| 全局限流 | ✅ 已实现 | slowapi 60 次/分钟（可配置） |
+| CORS 动态配置 | ✅ 已实现 | 从 ALLOWED_ORIGINS 环境变量读取 |
+| 搜索注入防护 | ✅ 已实现 | escape_search 转义 % 和 _ |
+| 点赞防刷 | ✅ 已实现 | PostLike 联合唯一约束 |
+| 头像大小校验 | ✅ 已实现 | ≤500KB + MIME 类型检查 |
+| 密码复杂度校验 | ✅ 已实现 | ≥8位 + 大写 + 小写 + 数字 |
+| 帖子长度限制 | ✅ 已实现 | max_length=2000 |
+| 昵称唯一性 | ✅ 已实现 | 注册时校验 |
+| 管理员自保护 | ✅ 已实现 | 不允许修改自己角色 |
+| 级联删除 | ✅ 已实现 | 删除题目时清理关联 mistakes + study_logs |
+| HTTPS | ⚠️ 待配置 | 生产环境必须 |
+| HttpOnly Cookie | ⚠️ 待实现 | refresh_token 当前存 localStorage |
 
-### 9.2 时间线
+---
 
+## 8. 部署架构
+
+### 开发环境
+
+```bash
+# 前端
+npm install && npx vite --port 3000
+
+# 后端（SQLite 零依赖模式）
+cd backend && pip install -r requirements.txt
+python init_db.py && python seed.py
+uvicorn app.main:app --port 8000 --reload
 ```
-Week 1-2: 需求分析 → 技术选型 → 架构设计 → 数据库设计
-Week 3-4: 用户注册/登录 → JWT认证 → 权限控制
-Week 5-6: 题目CRUD → 做题流程 → 答案提交
-Week 7-8: 错题本管理 → 闪卡系统 → 记忆曲线算法
-Week 9-10: 仪表盘页面 → Chart.js图表 → 学习统计
-Week 11-12: 社区动态 → 学习小组 → 学友互动
-Week 13-14: 单元测试 → 集成测试 → Bug修复
-Week 15-16: Docker部署 → 性能优化 → 上线发布
+
+### 生产环境
+
+```bash
+# 启动 PostgreSQL + Redis
+docker compose up -d
+
+# 后端
+cd backend
+# 修改 .env: DATABASE_URL=postgresql+asyncpg://lexicon:lexicon123@localhost:5432/lexiconprep
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# 前端
+npm run build
+# 使用 nginx 托管 dist/
 ```
 
----
+### Docker Compose
 
-## 10. 风险评估与应对策略
-
-| 风险类型 | 风险描述 | 发生概率 | 影响程度 | 应对策略 |
-|---------|---------|---------|---------|----------|
-| **技术风险** | 前端性能问题 | 中 | 中 | 使用Vue3组合式API、懒加载、代码分割 |
-| **技术风险** | 数据库性能瓶颈 | 中 | 高 | 索引优化、读写分离、Redis缓存 |
-| **业务风险** | 用户留存率低 | 中 | 高 | 优化用户体验、增加社交功能、推送提醒 |
-| **业务风险** | 题库内容不足 | 低 | 中 | 与高校合作、用户贡献机制 |
-| **安全风险** | 数据泄露 | 低 | 高 | 数据加密、访问日志、定期安全审计 |
-| **运营风险** | 服务器宕机 | 低 | 高 | 多可用区部署、自动故障转移 |
+当前编排：PostgreSQL 16 + Redis 7。前端/后端服务需手动启动或扩展 docker-compose.yml。
 
 ---
 
-## 附录
+## 9. 环境变量
 
-### A. 颜色规范
+### 后端 `.env`
 
-| 颜色名称 | 色值 | 用途 |
-|---------|------|------|
-| Primary (科技蓝) | #0058bc | 主色调、交互元素 |
-| Secondary (深灰) | #5f5e60 | 文字、次要元素 |
-| Tertiary (成功绿) | #006b27 | 成功状态、正向反馈 |
-| Error (错误红) | #ba1a1a | 错误状态、警告 |
-| Background | #f9f9fb | 页面背景 |
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| DATABASE_URL | `postgresql+asyncpg://...` | 数据库连接串 |
+| REDIS_URL | 空 | Redis 连接串 |
+| JWT_SECRET_KEY | ⚠️ 需更换 | JWT 签名密钥 |
+| JWT_ALGORITHM | HS256 | JWT 算法 |
+| ACCESS_TOKEN_EXPIRE_MINUTES | 15 | Access Token 有效期 |
+| REFRESH_TOKEN_EXPIRE_DAYS | 7 | Refresh Token 有效期 |
+| RATE_LIMIT_PER_MINUTE | 60 | 全局限流 |
+| ALLOWED_ORIGINS | 空 | CORS 允许的源（逗号分隔） |
+| DEBUG | false | 调试模式 |
 
-### B. 字体规范
+### 前端
 
-| 字体名称 | 用途 |
-|---------|------|
-| Manrope | 标题、Headline |
-| Inter | 正文、Body |
-| Geist | 标签、按钮文字 |
+| 变量 | 说明 |
+|------|------|
+| VITE_API_BASE_URL | API 基础 URL（已声明类型，待替换硬编码值） |
 
 ---
 
-**文档版本**: v1.0  
-**创建日期**: 2026-05-19  
+## 10. 已知问题与待办
+
+详见 [problems.md](./problems.md)，当前统计：
+
+| 优先级 | 数量 | 说明 |
+|--------|------|------|
+| P0 安全 | 3 | JWT 密钥硬编码、Refresh Token 存 localStorage、路由守卫可绕过 |
+| P1 功能 | 7 | 资源文件空壳、多选题未实现、无密码重置、无 404 页面等 |
+| P2 质量 | 18 | 错误处理不完善、baseURL 硬编码等 |
+| P3 性能 | 8 | 构建体积大、Chart 未销毁、无懒加载等 |
+| P4 规范 | 8 | 无测试、无 CI/CD、无 Alembic 迁移等 |
+
+---
+
+## 11. 测试账号
+
+| 角色 | 邮箱 | 密码 |
+|------|------|------|
+| 普通用户 | test@lexiconprep.com | test123 |
+| 管理员 | admin@lexiconprep.com | admin123 |
+
+---
+
 **适用项目**: LexiconPrep 考研备考平台

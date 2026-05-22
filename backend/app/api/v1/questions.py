@@ -26,6 +26,7 @@ async def list_subjects(
 async def list_questions(
     subject: str | None = Query(None),
     difficulty: int | None = Query(None),
+    search: str | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
@@ -36,6 +37,8 @@ async def list_questions(
         q = q.where(Question.subject == subject)
     if difficulty:
         q = q.where(Question.difficulty == difficulty)
+    if search:
+        q = q.where(Question.content.ilike(f"%{search}%"))
     q = q.offset(offset).limit(limit)
     result = await db.execute(q)
     return [QuestionResponse.model_validate(row) for row in result.scalars().all()]

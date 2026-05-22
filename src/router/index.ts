@@ -18,15 +18,30 @@ const router = createRouter({
     { path: '/admin', name: 'adminOverview', component: () => import('@/views/admin/AdminOverviewPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/admin/questions', name: 'adminQuestions', component: () => import('@/views/admin/AdminQuestionsPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
     { path: '/admin/users', name: 'adminUsers', component: () => import('@/views/admin/AdminUsersPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
+    { path: '/:pathMatch(.*)*', name: 'notFound', component: () => import('@/views/NotFoundPage.vue') },
   ],
 })
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
 
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('access_token')
 
-  if (to.meta.requiresAuth && !token) {
-    next('/login')
-    return
+  if (to.meta.requiresAuth) {
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+      next('/login')
+      return
+    }
   }
 
   if (to.meta.requiresAdmin) {

@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useUiStore } from '@/stores/ui'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -52,7 +52,7 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const { data } = await axios.post('http://localhost:8000/api/v1/auth/refresh', {
+        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'}/auth/refresh`, {
           refresh_token: refreshToken,
         })
         localStorage.setItem('access_token', data.access_token)

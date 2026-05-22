@@ -15,13 +15,14 @@ interface Question {
 const phase = ref<'select' | 'exam' | 'result'>('select')
 const selectedSubject = ref('政治')
 const questions = ref<Question[]>([])
-const answers = ref<Record<string, string>>({})
+const answers = ref<Record<string, string[]>>({})
 const feedback = ref<Record<string, { correct: boolean; analysis: string | null }>>({})
 const currentIndex = ref(0)
 const sheetOpen = ref(false)
 const timeElapsed = ref(0)
 const loading = ref(false)
 const error = ref('')
+const questionStartAt = ref<Record<string, number>>({})
 
 const subjects = ref<string[]>([])
 const loadingSubjects = ref(false)
@@ -67,23 +68,47 @@ const startExam = async () => {
     questions.value = data
     answers.value = {}
     feedback.value = {}
+    questionStartAt.value = {}
     currentIndex.value = 0
     timeElapsed.value = 0
     phase.value = 'exam'
     timer = setInterval(() => { timeElapsed.value++ }, 1000)
-  } catch (e: any) {
+    questionStartAt.value[data[0].id] = Date.now()
+  } catch {
     error.value = '加载题目失败'
   } finally {
     loading.value = false
   }
 }
 
-const submitAnswer = async (qId: string, answer: string) => {
-  answers.value[qId] = answer
+const isMultiple = (q: Question) => q.type === 'MULTIPLE'
+
+const toggleOption = (qId: string, label: string, multiple: boolean) => {
+  if (feedback.value[qId]) return
+  if (multiple) {
+    const current = answers.value[qId] || []
+    if (current.includes(label)) {
+      answers.value[qId] = current.filter(l => l !== label)
+    } else {
+      answers.value[qId] = [...current, label]
+    }
+  } else {
+    answers.value[qId] = [label]
+  }
+}
+
+const submitAnswer = async (qId: string) => {
+  const selected = answers.value[qId]
+  if (!selected || !selected.length) return
+
+  const now = Date.now()
+  const start = questionStartAt.value[qId] || now
+  const timeSpent = Math.round((now - start) / 1000)
+
   try {
     const { data } = await api.post(`/questions/${qId}/answer`, {
-      user_answer: [answer],
-      time_spent: 0,
+      user_answer: selected,
+      time_spent: timeSpent,
     })
     feedback.value[qId] = { correct: data.is_correct, analysis: data.analysis }
   } catch {
@@ -91,9 +116,28 @@ const submitAnswer = async (qId: string, answer: string) => {
   }
 }
 
-const prevQuestion = () => { if (currentIndex.value > 0) currentIndex.value-- }
-const nextQuestion = () => { if (currentIndex.value < totalQuestions.value - 1) currentIndex.value++ }
-const goToQuestion = (idx: number) => { currentIndex.value = idx }
+const prevQuestion = () => {
+  if (currentIndex.value > 0) {
+    currentIndex.value--
+    if (currentQuestion.value && !questionStartAt.value[currentQuestion.value.id] && !feedback.value[currentQuestion.value.id]) {
+      questionStartAt.value[currentQuestion.value.id] = Date.now()
+    }
+  }
+}
+const nextQuestion = () => {
+  if (currentIndex.value < totalQuestions.value - 1) {
+    currentIndex.value++
+    if (currentQuestion.value && !questionStartAt.value[currentQuestion.value.id] && !feedback.value[currentQuestion.value.id]) {
+      questionStartAt.value[currentQuestion.value.id] = Date.now()
+    }
+  }
+}
+const goToQuestion = (idx: number) => {
+  currentIndex.value = idx
+  if (currentQuestion.value && !questionStartAt.value[currentQuestion.value.id] && !feedback.value[currentQuestion.value.id]) {
+    questionStartAt.value[currentQuestion.value.id] = Date.now()
+  }
+}
 
 const finishExam = () => {
   if (timer) clearInterval(timer)
@@ -106,6 +150,23 @@ const retry = () => {
 }
 
 const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
+
+const isOptionSelected = (qId: string, label: string) => {
+  return (answers.value[qId] || []).includes(label)
+}
+
+const getOptionClass = (qId: string, label: string) => {
+  const fb = feedback.value[qId]
+  const selected = isOptionSelected(qId, label)
+  if (fb) {
+    if (selected) {
+      return fb.correct ? 'border-green-500 text-green-400 bg-green-500/10' : 'border-red-500 text-red-400 bg-red-500/10'
+    }
+    return 'border-hairline text-mute opacity-50'
+  }
+  if (selected) return 'border-ink text-ink bg-canvas-soft'
+  return 'border-hairline text-body hover:border-canvas-mid'
+}
 </script>
 
 <template>
@@ -163,21 +224,24 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
 
           <p class="text-ink text-lg font-normal leading-relaxed mb-8">{{ currentQuestion.content }}</p>
 
-          <div class="space-y-3" role="radiogroup" :aria-label="'第' + (currentIndex + 1) + '题选项'">
+          <div class="space-y-3" :role="isMultiple(currentQuestion) ? 'group' : 'radiogroup'" :aria-label="'第' + (currentIndex + 1) + '题选项'">
             <button
               v-for="(opt, idx) in currentQuestion.options"
               :key="idx"
-              role="radio"
-              :aria-checked="answers[currentQuestion.id] === optionLabel(idx)"
+              :role="isMultiple(currentQuestion) ? 'checkbox' : 'radio'"
+              :aria-checked="isOptionSelected(currentQuestion.id, optionLabel(idx))"
               class="w-full text-left px-5 py-3 rounded-card border text-sm font-normal transition-colors"
-              :class="answers[currentQuestion.id] === optionLabel(idx)
-                ? feedback[currentQuestion.id]
-                  ? feedback[currentQuestion.id].correct ? 'border-green-500 text-green-400 bg-green-500/10' : 'border-red-500 text-red-400 bg-red-500/10'
-                  : 'border-ink text-ink bg-canvas-soft'
-                : 'border-hairline text-body hover:border-canvas-mid'"
-              @click="submitAnswer(currentQuestion.id, optionLabel(idx))"
+              :class="getOptionClass(currentQuestion.id, optionLabel(idx))"
+              @click="toggleOption(currentQuestion.id, optionLabel(idx), isMultiple(currentQuestion))"
             >
               <span class="text-mute mr-2">{{ optionLabel(idx) }}.</span>{{ opt }}
+            </button>
+          </div>
+
+          <!-- Submit button for current question -->
+          <div v-if="!feedback[currentQuestion.id] && answers[currentQuestion.id]?.length" class="mt-4">
+            <button class="btn-pill-filled cursor-target text-sm" @click="submitAnswer(currentQuestion.id)">
+              确认提交
             </button>
           </div>
 
@@ -212,7 +276,7 @@ const optionLabel = (idx: number) => String.fromCharCode(65 + idx)
               class="w-10 h-10 rounded-card border text-xs font-mono transition-colors"
               :class="feedback[q.id]
                 ? feedback[q.id].correct ? 'border-green-500 text-green-400 bg-green-500/10' : 'border-red-500 text-red-400 bg-red-500/10'
-                : answers[q.id] ? 'border-ink text-ink bg-canvas-soft' : 'border-hairline text-mute'"
+                : answers[q.id]?.length ? 'border-ink text-ink bg-canvas-soft' : 'border-hairline text-mute'"
               @click="goToQuestion(idx)"
             >
               {{ idx + 1 }}

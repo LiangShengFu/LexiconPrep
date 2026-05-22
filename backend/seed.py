@@ -109,13 +109,12 @@ async def seed():
             print(f"Created {len(RESOURCES)} resources.")
 
         # Seed community posts from test user
-        result = await db.execute(select(CommunityPost))
-        if result.first():
+        c_result = await db.execute(select(CommunityPost))
+        if c_result.scalars().first():
             print("Community posts already exist, skipping.")
         else:
-            # Get the test user
-            result = await db.execute(select(User).where(User.email == "test@lexiconprep.com"))
-            test_user = result.scalar_one()
+            u_result = await db.execute(select(User).where(User.email == "test@lexiconprep.com"))
+            test_user = u_result.scalar_one()
             posts = [
                 CommunityPost(user_id=test_user.id, content="刚刚达成 60 天连续打卡！悬浮番茄钟真的改变了我的学习节奏。", subject="考研经验"),
                 CommunityPost(user_id=test_user.id, content="有谁有民法部分的好的复习资料吗？案例分析题太密了。", subject="法学"),

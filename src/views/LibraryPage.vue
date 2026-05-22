@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 const activeTab = ref<'resources' | 'mistakes'>('resources')
@@ -12,9 +13,10 @@ interface Resource {
   subject: string; year: number | null; size: number; downloads: number; file_url: string
 }
 interface MistakeItem {
-  id: string; question_id: string; wrong_count: number
+  id: string; question_id: string; wrong_count: number; review_count: number | null
   last_review_at: string | null; next_review_at: string
   question_content: string | null; question_subject: string | null
+  mastered: boolean | null
 }
 
 const resources = ref<Resource[]>([])
@@ -57,8 +59,32 @@ const loadMistakes = async () => {
 }
 
 const deleteMistake = async (id: string) => {
-  await api.delete(`/mistakes/${id}`)
-  mistakes.value = mistakes.value.filter(m => m.id !== id)
+  try {
+    await api.delete(`/mistakes/${id}`)
+    mistakes.value = mistakes.value.filter(m => m.id !== id)
+    useUiStore().addToast('已删除', 'success')
+  } catch {
+    useUiStore().addToast('删除失败', 'error')
+  }
+}
+
+const reviewMistake = async (id: string, remembered: boolean) => {
+  try {
+    await api.post(`/mistakes/${id}/review`, null, { params: { remembered } })
+    if (remembered) {
+      mistakes.value = mistakes.value.filter(m => m.id !== id)
+      useUiStore().addToast('已标记为掌握', 'success')
+    } else {
+      const m = mistakes.value.find(m => m.id === id)
+      if (m) {
+        m.wrong_count += 1
+        m.review_count = (m.review_count || 0) + 1
+      }
+      useUiStore().addToast('已重新安排复习', 'success')
+    }
+  } catch {
+    useUiStore().addToast('操作失败', 'error')
+  }
 }
 
 watch(activeTab, (tab) => {
@@ -137,16 +163,21 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
         <p class="text-mute text-xs">做题时答错的题目会自动加入这里。</p>
       </div>
       <div v-else class="space-y-3">
-        <div v-for="m in mistakes" :key="m.id" class="card-xai flex items-start justify-between gap-4 group cursor-target">
+        <div v-for="m in mistakes" :key="m.id" class="card-xai flex items-start justify-between gap-4 group">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1">
               <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ m.question_subject }}</span>
               <span class="text-xs text-mute">错 {{ m.wrong_count }} 次</span>
+              <span v-if="m.review_count" class="text-xs text-mute">复习 {{ m.review_count }} 次</span>
               <span class="text-xs text-mute">下次复习: {{ formatDate(m.next_review_at) }}</span>
             </div>
             <p class="text-body text-sm truncate">{{ m.question_content }}</p>
           </div>
-          <button class="text-mute text-xs hover:text-red-400 transition-colors shrink-0 mt-1" @click="deleteMistake(m.id)">删除</button>
+          <div class="flex items-center gap-2 shrink-0 mt-1">
+            <button class="btn-pill-filled cursor-target text-xs px-3 py-1" @click="reviewMistake(m.id, true)">已掌握</button>
+            <button class="btn-pill-outline cursor-target text-xs px-3 py-1" @click="reviewMistake(m.id, false)">再复习</button>
+            <button class="text-mute text-xs hover:text-red-400 transition-colors" @click="deleteMistake(m.id)">删除</button>
+          </div>
         </div>
       </div>
     </template>
