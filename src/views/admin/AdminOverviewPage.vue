@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 const stats = ref({ users: 0, questions: 0, answers: 0, subjects: {} as Record<string, number> })

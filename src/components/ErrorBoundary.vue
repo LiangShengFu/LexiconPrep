@@ -3,6 +3,7 @@ import { ref, onErrorCaptured } from 'vue'
 
 const hasError = ref(false)
 const errorMsg = ref('')
+const retryKey = ref(0)
 
 onErrorCaptured((err: Error) => {
   hasError.value = true
@@ -13,6 +14,7 @@ onErrorCaptured((err: Error) => {
 const retry = () => {
   hasError.value = false
   errorMsg.value = ''
+  retryKey.value++
 }
 </script>
 
@@ -22,5 +24,5 @@ const retry = () => {
     <p class="text-sm text-red-400 mb-6">{{ errorMsg }}</p>
     <button class="btn-pill-outline cursor-target text-sm" @click="retry">重新加载</button>
   </div>
-  <slot v-else />
+  <slot v-else :key="retryKey" />
 </template>

@@ -193,7 +193,7 @@ const props = withDefaults(defineProps<FaultyTerminalProps>(), {
   scale: 1, gridMul: () => [2, 1], digitSize: 1.5, timeScale: 0.3, pause: false,
   scanlineIntensity: 0.3, glitchAmount: 1, flickerAmount: 1, noiseAmp: 1,
   chromaticAberration: 0, dither: 0, curvature: 0.2, tint: '#ffffff',
-  mouseReact: true, mouseStrength: 0.2, dpr: Math.min(window.devicePixelRatio || 1, 2),
+  mouseReact: true, mouseStrength: 0.2, dpr: typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1,
   pageLoadAnimation: true, brightness: 1, className: '', style: () => ({}),
 })
 
@@ -304,7 +304,17 @@ const setup = () => {
 }
 onMounted(() => { detectLowEnd(); if (containerRef.value && !isLowEnd.value) setup() })
 onBeforeUnmount(() => { if (cleanup) { cleanup(); cleanup = null } })
-watch(() => props, () => { if (cleanup) { cleanup(); cleanup = null }; setup() }, { deep: true })
+
+watch([
+  () => props.scale, () => props.gridMul, () => props.digitSize, () => props.timeScale,
+  () => props.scanlineIntensity, () => props.glitchAmount, () => props.flickerAmount,
+  () => props.noiseAmp, () => props.chromaticAberration, () => props.dither, () => props.curvature,
+  () => props.tint, () => props.mouseReact, () => props.mouseStrength, () => props.pageLoadAnimation,
+  () => props.brightness,
+], () => {
+  if (cleanup) { cleanup(); cleanup = null }
+  setup()
+})
 </script>
 
 <template>

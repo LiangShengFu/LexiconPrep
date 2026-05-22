@@ -84,7 +84,7 @@ const shuffleText = (originalText: string, currentRevealed: Set<number>): string
 }
 
 watch(
-  [() => isHovering.value, () => props.text, () => props.speed, () => props.maxIterations, () => props.sequential, () => props.revealDirection, () => props.characters, () => props.useOriginalCharsOnly],
+  [() => isHovering.value, () => props.text, () => props.animateOn],
   () => {
     let currentIteration = 0
     if (interval) { clearInterval(interval); interval = null }

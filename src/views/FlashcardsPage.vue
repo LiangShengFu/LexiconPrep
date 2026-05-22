@@ -63,14 +63,6 @@ const reviewCard = async (remembered: boolean) => {
   } catch { useUiStore().addToast('操作失败', 'error') }
   nextCard()
 }
-
-const deleteCard = async (id: string) => {
-  try {
-    await api.delete(`/flashcards/${id}`)
-    await loadCards()
-    useUiStore().addToast('已删除', 'success')
-  } catch { useUiStore().addToast('删除失败', 'error') }
-}
 </script>
 
 <template>

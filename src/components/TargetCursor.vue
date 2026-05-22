@@ -55,9 +55,9 @@ const setupAnimation = () => {
   }
   createSpinTimeline()
 
-  window.addEventListener('mousemove', (e: MouseEvent) => moveCursor(e.clientX, e.clientY))
+  const handleGlobalMouseMove = (e: MouseEvent) => moveCursor(e.clientX, e.clientY)
 
-  window.addEventListener('mouseover', (e: MouseEvent) => {
+  const handleGlobalMouseOver = (e: MouseEvent) => {
     const directTarget = e.target as Element
     const allTargets: Element[] = []
     let current = directTarget
@@ -134,9 +134,14 @@ const setupAnimation = () => {
     }
     target.addEventListener('mousemove', currentTargetMove)
     target.addEventListener('mouseleave', currentLeaveHandler)
-  }, { passive: true })
+  }
+
+  window.addEventListener('mousemove', handleGlobalMouseMove)
+  window.addEventListener('mouseover', handleGlobalMouseOver, { passive: true })
 
   cleanupAnimation = () => {
+    window.removeEventListener('mousemove', handleGlobalMouseMove)
+    window.removeEventListener('mouseover', handleGlobalMouseOver)
     if (activeTarget) cleanupTarget(activeTarget)
     if (resumeTimeout) clearTimeout(resumeTimeout)
     spinTl.value?.kill(); spinTl.value = null

@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     RATE_LIMIT_PER_MINUTE: int = 100
+    ALLOWED_ORIGINS: str = ""
 
     model_config = {"env_file": ".env", "case_sensitive": True}
 

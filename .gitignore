@@ -7,9 +7,12 @@ __pycache__/
 .venv/
 venv/
 .env
+.env.*
+!.env.example
 .DS_Store
 design-systems/
 backend/lexiconprep.db
+backend/*.db
 .vscode/
 .idea/
 *.log
