@@ -31,6 +31,7 @@ class UserListResponse(BaseModel):
     id: uuid.UUID
     email: str
     nickname: str
+    avatar: str | None = None
     role: str
     streak_days: int
     total_knowledge_points: int

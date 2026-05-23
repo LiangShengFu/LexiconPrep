@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, users, questions, mistakes, flashcards, resources, stats, admin, community
+from app.api.v1 import auth, users, questions, mistakes, flashcards, resources, stats, admin, community, ai
 
 api_router = APIRouter()
 
@@ -13,3 +13,4 @@ api_router.include_router(resources.router)
 api_router.include_router(stats.router)
 api_router.include_router(admin.router)
 api_router.include_router(community.router)
+api_router.include_router(ai.router)

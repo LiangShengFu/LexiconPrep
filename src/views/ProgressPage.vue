@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Chart, BarController, DoughnutController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
+import { useUiStore } from '@/stores/ui'
 import api from '@/api/client'
 
 Chart.register(BarController, DoughnutController, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
@@ -11,6 +12,10 @@ const loading = ref(true)
 const error = ref('')
 let trendInstance: Chart | null = null
 let subjectInstance: Chart | null = null
+
+const showDiagnosis = ref(false)
+const diagnosisLoading = ref(false)
+const diagnosisText = ref('')
 
 onBeforeUnmount(() => {
   trendInstance?.destroy()
@@ -24,7 +29,7 @@ const stats = ref([
   { label: '当前连续', value: '0 天' },
 ])
 
-onMounted(async () => {
+const fetchData = async () => {
   try {
     const [ov, tr, pr] = await Promise.all([
       api.get('/stats/overview'),
@@ -95,20 +100,52 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(fetchData)
+
+const fetchDiagnosis = async () => {
+  diagnosisLoading.value = true
+  diagnosisText.value = ''
+  showDiagnosis.value = true
+  try {
+    const { data } = await api.get('/ai/diagnosis')
+    diagnosisText.value = data.diagnosis
+  } catch (e: any) {
+    const msg = e.response?.data?.detail || 'AI 诊断失败'
+    useUiStore().addToast(msg, 'error')
+    showDiagnosis.value = false
+  } finally {
+    diagnosisLoading.value = false
+  }
+}
+
+const renderMarkdown = (text: string) => {
+  return text
+    .replace(/^### (.+)$/gm, '<h3 class="text-ink text-sm font-bold mt-4 mb-2">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-ink text-base font-bold mt-5 mb-2">$1</h2>')
+    .replace(/^\*\*(.+?)\*\*/g, '<strong class="text-ink">$1</strong>')
+    .replace(/^- (.+)$/gm, '<li class="text-body text-sm ml-4">$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li class="text-body text-sm ml-4">$1. $2</li>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>')
+}
 </script>
 
 <template>
   <div class="p-8 space-y-6">
-    <div>
-      <p class="eyebrow-mono-sm mb-2">数据分析</p>
-      <h1 class="text-display-sm text-ink">学习进度</h1>
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="eyebrow-mono-sm mb-2">数据分析</p>
+        <h1 class="text-display-sm text-ink">学习进度</h1>
+      </div>
+      <button class="btn-pill-filled cursor-target text-sm" @click="fetchDiagnosis">AI 诊断</button>
     </div>
 
     <div v-if="loading" class="text-mute text-sm py-12 text-center">加载中...</div>
     <div v-else-if="error" class="card-xai text-center py-12">
       <p class="text-red-400 mb-4">{{ error }}</p>
-      <button class="btn-pill-outline cursor-target text-sm" @click="() => { error = ''; loading = true; onMounted() }">重试</button>
+      <button class="btn-pill-outline cursor-target text-sm" @click="() => { error = ''; loading = true; fetchData() }">重试</button>
     </div>
     <template v-else>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -133,5 +170,26 @@ onMounted(async () => {
         </div>
       </div>
     </template>
+
+    <!-- AI Diagnosis Modal -->
+    <div v-if="showDiagnosis" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" @click.self="showDiagnosis = false">
+      <div class="card-xai w-full max-w-[680px] mx-4 max-h-[85vh] overflow-auto space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="eyebrow-mono-sm text-mute mb-1">AI 学习诊断</p>
+            <h2 class="text-body-lg text-ink">个性化诊断报告</h2>
+          </div>
+          <button class="text-mute text-sm hover:text-ink transition-colors" @click="showDiagnosis = false">✕</button>
+        </div>
+
+        <div v-if="diagnosisLoading" class="py-16 text-center space-y-4">
+          <div class="inline-block w-8 h-8 border-2 border-ink border-t-transparent rounded-full animate-spin" />
+          <p class="text-mute text-sm">AI 正在分析你的学习数据...</p>
+          <p class="text-mute text-xs">约需 10-15 秒</p>
+        </div>
+
+        <div v-else class="prose prose-invert max-w-none" v-html="renderMarkdown(diagnosisText)" />
+      </div>
+    </div>
   </div>
 </template>

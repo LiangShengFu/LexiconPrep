@@ -1,10 +1,12 @@
 """Admin API — manage questions, users, and system."""
 import uuid
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, delete as sa_delete
 
 from app.core.database import get_db
+from app.core.security import hash_password
 from app.models.user import User
 from app.models.question import Question
 from app.models.study_log import StudyLog
@@ -13,6 +15,15 @@ from app.api.deps import get_admin_user
 from app.core.utils import escape_search
 from app.schemas.user import UserListResponse, UserRoleUpdate
 from app.schemas.question import QuestionResponse, QuestionCreate, QuestionUpdate
+
+
+class BatchDeleteRequest(BaseModel):
+    ids: list[uuid.UUID]
+
+
+class PasswordResetRequest(BaseModel):
+    new_password: str
+
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -86,6 +97,23 @@ async def admin_delete_question(
     return {"status": "success"}
 
 
+@router.post("/questions/batch-delete")
+async def admin_batch_delete_questions(
+    data: BatchDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    for qid in data.ids:
+        await db.execute(sa_delete(Mistake).where(Mistake.question_id == qid))
+        await db.execute(sa_delete(StudyLog).where(StudyLog.question_id == qid))
+    result = await db.execute(select(Question).where(Question.id.in_(data.ids)))
+    questions = result.scalars().all()
+    for q in questions:
+        await db.delete(q)
+    await db.commit()
+    return {"status": "success", "deleted": len(questions)}
+
+
 # ─── Users ───
 
 @router.get("/users", response_model=list[UserListResponse])
@@ -114,6 +142,22 @@ async def admin_update_user_role(
     if user.id == admin.id:
         raise HTTPException(status_code=400, detail="不能修改自己的角色")
     user.role = data.role
+    await db.commit()
+    return {"status": "success"}
+
+
+@router.put("/users/{user_id}/password")
+async def admin_reset_user_password(
+    user_id: uuid.UUID,
+    data: PasswordResetRequest,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    user.password_hash = hash_password(data.new_password)
     await db.commit()
     return {"status": "success"}
 

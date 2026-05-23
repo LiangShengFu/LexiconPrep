@@ -12,7 +12,9 @@ const sidebarOpen = ref(false)
 
 const navItems = [
   { path: '/profile', label: '个人主页', icon: 'User' },
+  { path: '/exam', label: '答题', icon: 'EditPen' },
   { path: '/library', label: '资源库', icon: 'Reading' },
+  { path: '/progress', label: '学习进度', icon: 'TrendCharts' },
   { path: '/flashcards', label: '闪卡', icon: 'Collection' },
   { path: '/community', label: '社区', icon: 'ChatLineSquare' },
 ]

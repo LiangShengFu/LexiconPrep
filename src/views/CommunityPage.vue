@@ -43,7 +43,6 @@ const createPost = async () => {
 }
 
 const likePost = async (post: Post) => {
-  const prevLikes = post.likes
   try {
     const { data } = await api.post(`/community/posts/${post.id}/like`)
     post.likes = data.likes

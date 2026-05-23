@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 100
     ALLOWED_ORIGINS: str = ""
 
+    DEEPSEEK_API_KEY: str = ""
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    DEEPSEEK_MODEL: str = "deepseek-chat"
+
     model_config = {"env_file": ".env", "case_sensitive": True}
 
 

@@ -5,7 +5,15 @@ echo "Waiting for database..."
 max_retries=30
 retry=0
 while [ $retry -lt $max_retries ]; do
-  if python -c "import asyncio; from app.core.database import async_engine; asyncio.run(async_engine.dispose())" 2>/dev/null; then
+  if python -c "
+import asyncio
+from sqlalchemy import text
+from app.core.database import engine
+async def check():
+    async with engine.connect() as conn:
+        await conn.execute(text('SELECT 1'))
+asyncio.run(check())
+" 2>/dev/null; then
     echo "Database is ready."
     break
   fi
