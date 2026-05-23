@@ -40,6 +40,9 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     if response.status_code >= 400:
         logger.warning(f"{request.method} {request.url.path} -> {response.status_code}")
+    if request.method == "GET" and "/api/" in request.url.path:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
     return response
 
 

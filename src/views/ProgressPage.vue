@@ -17,6 +17,11 @@ const showDiagnosis = ref(false)
 const diagnosisLoading = ref(false)
 const diagnosisText = ref('')
 
+const showStudyPlan = ref(false)
+const studyPlanLoading = ref(false)
+const studyPlanForm = ref({ days: 7, daily_minutes: 60, target_subjects: '' as string })
+const studyPlanData = ref<any>(null)
+
 onBeforeUnmount(() => {
   trendInstance?.destroy()
   subjectInstance?.destroy()
@@ -120,6 +125,28 @@ const fetchDiagnosis = async () => {
   }
 }
 
+const fetchStudyPlan = async () => {
+  studyPlanLoading.value = true
+  studyPlanData.value = null
+  showStudyPlan.value = true
+  try {
+    const payload: any = {
+      days: studyPlanForm.value.days,
+      daily_minutes: studyPlanForm.value.daily_minutes,
+    }
+    const subjects = studyPlanForm.value.target_subjects.split(/[,，]/).map(s => s.trim()).filter(Boolean)
+    if (subjects.length > 0) payload.target_subjects = subjects
+    const { data } = await api.post('/ai/study-plan', payload)
+    studyPlanData.value = data
+  } catch (e: any) {
+    const msg = e.response?.data?.detail || 'AI 学习计划生成失败'
+    useUiStore().addToast(msg, 'error')
+    showStudyPlan.value = false
+  } finally {
+    studyPlanLoading.value = false
+  }
+}
+
 const renderMarkdown = (text: string) => {
   return text
     .replace(/^### (.+)$/gm, '<h3 class="text-ink text-sm font-bold mt-4 mb-2">$1</h3>')
@@ -139,7 +166,10 @@ const renderMarkdown = (text: string) => {
         <p class="eyebrow-mono-sm mb-2">数据分析</p>
         <h1 class="text-display-sm text-ink">学习进度</h1>
       </div>
-      <button class="btn-pill-filled cursor-target text-sm" @click="fetchDiagnosis">AI 诊断</button>
+      <div class="flex gap-3">
+        <button class="btn-pill-outline cursor-target text-sm" @click="showStudyPlan = true; studyPlanData = null">AI 学习计划</button>
+        <button class="btn-pill-filled cursor-target text-sm" @click="fetchDiagnosis">AI 诊断</button>
+      </div>
     </div>
 
     <div v-if="loading" class="text-mute text-sm py-12 text-center">加载中...</div>
@@ -189,6 +219,104 @@ const renderMarkdown = (text: string) => {
         </div>
 
         <div v-else class="prose prose-invert max-w-none" v-html="renderMarkdown(diagnosisText)" />
+      </div>
+    </div>
+
+    <!-- AI Study Plan Modal -->
+    <div v-if="showStudyPlan" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" @click.self="showStudyPlan = false">
+      <div class="card-xai w-full max-w-[720px] mx-4 max-h-[90vh] overflow-auto space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="eyebrow-mono-sm text-mute mb-1">AI 学习计划</p>
+            <h2 class="text-body-lg text-ink">个性化学习规划</h2>
+          </div>
+          <button class="text-mute text-sm hover:text-ink transition-colors" @click="showStudyPlan = false">✕</button>
+        </div>
+
+        <!-- Plan Config (shown when no plan yet) -->
+        <div v-if="!studyPlanData && !studyPlanLoading" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-body text-xs mb-1">计划天数</label>
+              <select v-model.number="studyPlanForm.days" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+                <option v-for="d in [3, 5, 7, 10, 14, 21, 30]" :key="d" :value="d">{{ d }} 天</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-body text-xs mb-1">每日学习时间</label>
+              <select v-model.number="studyPlanForm.daily_minutes" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+                <option :value="30">30 分钟</option>
+                <option :value="60">1 小时</option>
+                <option :value="90">1.5 小时</option>
+                <option :value="120">2 小时</option>
+                <option :value="180">3 小时</option>
+                <option :value="240">4 小时</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-body text-xs mb-1">重点学科（可选，逗号分隔）</label>
+            <input v-model="studyPlanForm.target_subjects" placeholder="如：政治, 英语" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          </div>
+          <div class="bg-canvas-soft border border-hairline rounded-card p-3 text-xs text-mute space-y-1">
+            <p>AI 将基于你的错题记录、正确率趋势和薄弱章节，生成包含以下内容的学习计划：</p>
+            <p>每日学习重点 + 具体任务 + 复习安排 + 预估提升空间</p>
+          </div>
+          <div class="flex gap-3 pt-1">
+            <button class="btn-pill-outline cursor-target flex-1 text-sm" @click="showStudyPlan = false">取消</button>
+            <button class="btn-pill-filled cursor-target flex-1 text-sm" @click="fetchStudyPlan">生成学习计划</button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="studyPlanLoading" class="py-16 text-center space-y-4">
+          <div class="inline-block w-8 h-8 border-2 border-ink border-t-transparent rounded-full animate-spin" />
+          <p class="text-mute text-sm">AI 正在为你制定学习计划...</p>
+          <p class="text-mute text-xs">约需 15-20 秒</p>
+        </div>
+
+        <!-- Plan Result -->
+        <div v-if="studyPlanData && !studyPlanLoading" class="space-y-4">
+          <div v-if="studyPlanData.summary" class="bg-canvas-soft border border-hairline rounded-card p-4">
+            <p class="text-ink text-sm font-bold mb-1">规划概述</p>
+            <p class="text-body text-sm">{{ studyPlanData.summary }}</p>
+            <p v-if="studyPlanData.estimated_accuracy_gain" class="text-mute text-xs mt-2">预估正确率提升：{{ studyPlanData.estimated_accuracy_gain }}</p>
+          </div>
+
+          <div class="space-y-3">
+            <div v-for="day in studyPlanData.plan" :key="day.day" class="border border-hairline rounded-card p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-canvas text-xs font-bold">D{{ day.day }}</span>
+                  <span class="text-ink text-sm font-bold">{{ day.focus }}</span>
+                </div>
+                <span class="text-mute text-xs">{{ day.duration_minutes }} 分钟</span>
+              </div>
+
+              <div>
+                <p class="text-mute text-xs mb-1.5">学习任务</p>
+                <ul class="space-y-1">
+                  <li v-for="(task, ti) in day.tasks" :key="ti" class="flex items-start gap-2 text-body text-sm">
+                    <span class="text-mute text-xs mt-0.5 shrink-0">•</span>
+                    <span>{{ task }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="day.review_topics && day.review_topics.length > 0">
+                <p class="text-mute text-xs mb-1.5">复习要点</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <span v-for="(topic, ti) in day.review_topics" :key="ti" class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ topic }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button class="btn-pill-outline cursor-target flex-1 text-sm" @click="studyPlanData = null">重新配置</button>
+            <button class="btn-pill-filled cursor-target flex-1 text-sm" @click="fetchStudyPlan">重新生成</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

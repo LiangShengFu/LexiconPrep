@@ -18,6 +18,9 @@ from app.schemas.ai import (
     GenerateQuestionsResponse,
     GeneratedQuestion,
     DiagnosisResponse,
+    StudyPlanRequest,
+    StudyPlanResponse,
+    DayPlan,
 )
 
 logger = logging.getLogger(__name__)
@@ -247,3 +250,194 @@ async def get_diagnosis(
         raise HTTPException(status_code=502, detail=f"AI 服务调用失败: {str(e)}")
 
     return DiagnosisResponse(diagnosis=diagnosis)
+
+
+STUDY_PLAN_SYSTEM_PROMPT = """你是一位考研学习规划专家。根据学生的学习数据和目标，制定科学、可执行的学习计划。
+
+严格规则：
+1. 计划必须基于学生的实际薄弱点，不能泛泛而谈
+2. 每天的任务必须具体到章节和知识点
+3. 遵循艾宾浩斯遗忘曲线安排复习
+4. 合理分配新学知识和复习的时间比例（建议3:7到5:5）
+5. 考虑学习疲劳，每天安排适当休息
+
+输出格式：返回一个JSON对象，包含以下字段：
+{
+  "plan": [
+    {
+      "day": 1,
+      "focus": "当天学习重点（一句话概括）",
+      "tasks": ["具体任务1", "具体任务2", ...],
+      "duration_minutes": 建议学习分钟数,
+      "review_topics": ["需要复习的知识点1", ...]
+    }
+  ],
+  "summary": "整体规划概述（2-3句话）",
+  "estimated_accuracy_gain": "预估正确率提升幅度，如 5%-10%"
+}"""
+
+
+@router.post("/study-plan", response_model=StudyPlanResponse)
+async def generate_study_plan(
+    data: StudyPlanRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not settings.DEEPSEEK_API_KEY:
+        raise HTTPException(status_code=500, detail="DEEPSEEK_API_KEY 未配置")
+
+    total_result = await db.execute(
+        select(func.count(StudyLog.id)).where(StudyLog.user_id == current_user.id)
+    )
+    total = total_result.scalar() or 0
+
+    if total == 0:
+        default_plan = [
+            DayPlan(
+                day=i,
+                focus=f"第{i}天：基础入门",
+                tasks=[f"完成 {data.daily_minutes // 3} 分钟基础题目练习", "阅读核心知识点", "整理笔记"],
+                duration_minutes=data.daily_minutes,
+                review_topics=["回顾前一天内容"] if i > 1 else [],
+            )
+            for i in range(1, data.days + 1)
+        ]
+        return StudyPlanResponse(
+            plan=default_plan,
+            summary="你还没有学习记录，已为你生成入门级学习计划。完成一些题目后，AI 将基于你的数据生成更精准的计划。",
+            estimated_accuracy_gain="N/A（暂无基线数据）",
+        )
+
+    correct_result = await db.execute(
+        select(func.count(StudyLog.id)).where(
+            StudyLog.user_id == current_user.id, StudyLog.is_correct == True
+        )
+    )
+    correct = correct_result.scalar() or 0
+
+    total_seconds_result = await db.execute(
+        select(func.coalesce(func.sum(StudyLog.time_spent), 0)).where(
+            StudyLog.user_id == current_user.id
+        )
+    )
+    total_seconds = total_seconds_result.scalar() or 0
+
+    wrong_by_chapter_result = await db.execute(
+        select(Question.chapter, func.count(Mistake.id))
+        .join(Question, Mistake.question_id == Question.id)
+        .where(Mistake.user_id == current_user.id, Mistake.mastered == False)
+        .group_by(Question.chapter)
+        .order_by(func.count(Mistake.id).desc())
+        .limit(8)
+    )
+    weak_chapters = {row[0] or "未分类": row[1] for row in wrong_by_chapter_result.all()}
+
+    wrong_by_subject_result = await db.execute(
+        select(Question.subject, func.count(Mistake.id))
+        .join(Question, Mistake.question_id == Question.id)
+        .where(Mistake.user_id == current_user.id, Mistake.mastered == False)
+        .group_by(Question.subject)
+        .order_by(func.count(Mistake.id).desc())
+    )
+    weak_subjects = {row[0]: row[1] for row in wrong_by_subject_result.all()}
+
+    accuracy_by_subject_result = await db.execute(
+        select(
+            Question.subject,
+            func.count(StudyLog.id).label("total"),
+            func.sum(func.cast(StudyLog.is_correct, Integer)).label("correct"),
+        )
+        .join(Question, StudyLog.question_id == Question.id)
+        .where(StudyLog.user_id == current_user.id)
+        .group_by(Question.subject)
+    )
+    accuracy_by_subject = {}
+    for row in accuracy_by_subject_result.all():
+        t = row[1] or 0
+        c = row[2] or 0
+        accuracy_by_subject[row[0]] = {"total": t, "correct": c, "accuracy": round(c / t * 100, 1) if t > 0 else 0}
+
+    mastered_result = await db.execute(
+        select(func.count(Mistake.id)).where(
+            Mistake.user_id == current_user.id, Mistake.mastered == True
+        )
+    )
+    mastered_count = mastered_result.scalar() or 0
+
+    unmastered_result = await db.execute(
+        select(func.count(Mistake.id)).where(
+            Mistake.user_id == current_user.id, Mistake.mastered == False
+        )
+    )
+    unmastered_count = unmastered_result.scalar() or 0
+
+    recent_7d_result = await db.execute(
+        select(func.count(StudyLog.id)).where(
+            StudyLog.user_id == current_user.id,
+            StudyLog.timestamp >= func.now() - func.cast("7 days", type_=None),
+        )
+    )
+
+    data_summary = {
+        "total_questions_answered": total,
+        "correct_count": correct,
+        "average_accuracy": round(correct / total * 100, 1) if total > 0 else 0,
+        "total_study_minutes": total_seconds // 60,
+        "streak_days": current_user.streak_days,
+        "weak_chapters": weak_chapters,
+        "weak_subjects": weak_subjects,
+        "accuracy_by_subject": accuracy_by_subject,
+        "mastered_mistakes": mastered_count,
+        "unmastered_mistakes": unmastered_count,
+    }
+
+    target_info = ""
+    if data.target_subjects:
+        target_info = f"\n重点攻克学科：{', '.join(data.target_subjects)}"
+
+    user_prompt = f"""基于以下学习数据，制定一份 {data.days} 天的考研学习计划：
+
+{json.dumps(data_summary, ensure_ascii=False, indent=2)}
+
+要求：
+- 计划天数：{data.days} 天
+- 每日可用学习时间：{data.daily_minutes} 分钟{target_info}
+- 优先安排薄弱章节的强化训练
+- 每天必须包含错题复习环节
+- 任务描述要具体到章节和知识点
+
+请生成详细的学习计划。"""
+
+    try:
+        result = await chat_completion_json(
+            system_prompt=STUDY_PLAN_SYSTEM_PROMPT,
+            user_prompt=user_prompt,
+            temperature=0.6,
+            max_tokens=4096,
+        )
+    except Exception as e:
+        logger.error(f"LLM call failed: {e}")
+        raise HTTPException(status_code=502, detail=f"AI 服务调用失败: {str(e)}")
+
+    try:
+        plan_data = result.get("plan", []) if isinstance(result, dict) else result
+        if not isinstance(plan_data, list):
+            plan_data = [plan_data]
+
+        day_plans = []
+        for i, item in enumerate(plan_data[:data.days]):
+            day_plans.append(DayPlan(
+                day=item.get("day", i + 1),
+                focus=item.get("focus", ""),
+                tasks=item.get("tasks", []),
+                duration_minutes=item.get("duration_minutes", data.daily_minutes),
+                review_topics=item.get("review_topics", []),
+            ))
+
+        summary = result.get("summary", "") if isinstance(result, dict) else ""
+        gain = result.get("estimated_accuracy_gain", "") if isinstance(result, dict) else ""
+
+        return StudyPlanResponse(plan=day_plans, summary=summary, estimated_accuracy_gain=gain)
+    except Exception as e:
+        logger.error(f"Failed to parse study plan: {e}")
+        raise HTTPException(status_code=502, detail="AI 返回的学习计划格式异常，请重试")

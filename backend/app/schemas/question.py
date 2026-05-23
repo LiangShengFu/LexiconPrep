@@ -8,6 +8,8 @@ class QuestionResponse(BaseModel):
     type: str
     content: str
     options: list[str]
+    answer: list[str]
+    analysis: str | None = None
     difficulty: int
     subject: str
     chapter: str | None = None

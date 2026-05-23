@@ -27,3 +27,23 @@ class GenerateQuestionsResponse(BaseModel):
 
 class DiagnosisResponse(BaseModel):
     diagnosis: str
+
+
+class StudyPlanRequest(BaseModel):
+    days: int = Field(default=7, ge=3, le=30, description="计划天数")
+    daily_minutes: int = Field(default=60, ge=15, le=300, description="每日可用学习分钟数")
+    target_subjects: list[str] | None = Field(None, description="重点攻克学科")
+
+
+class DayPlan(BaseModel):
+    day: int
+    focus: str
+    tasks: list[str]
+    duration_minutes: int
+    review_topics: list[str]
+
+
+class StudyPlanResponse(BaseModel):
+    plan: list[DayPlan]
+    summary: str
+    estimated_accuracy_gain: str

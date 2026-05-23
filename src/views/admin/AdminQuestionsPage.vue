@@ -28,7 +28,7 @@ const allSelected = computed(() => questions.value.length > 0 && questions.value
 const load = async () => {
   loading.value = true
   try {
-    const params: any = { limit: 100 }
+    const params: any = { limit: 100, _t: Date.now() }
     if (search.value) params.search = search.value
     if (filterSubject.value) params.subject = filterSubject.value
     const { data } = await api.get('/admin/questions', { params })
