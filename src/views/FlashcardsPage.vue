@@ -84,7 +84,7 @@ const reviewCard = async (remembered: boolean) => {
       <div class="w-full max-w-[600px] aspect-[3/2] cursor-pointer" tabindex="0" @click="flip" @keyup.enter="flip" @keydown.space.prevent="flip" aria-label="闪卡，点击或按回车翻转">
         <div class="relative w-full h-full transition-transform duration-500" :style="{ transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)', transformStyle: 'preserve-3d' }">
           <div class="absolute inset-0 card-xai flex flex-col justify-center items-center p-10" :style="{ backfaceVisibility: 'hidden' }">
-            <span v-if="currentCard.subject" class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute font-mono uppercase mb-4">{{ currentCard.subject }}</span>
+            <span v-if="currentCard.subject" class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute font-mono uppercase mb-4">{{ currentCard.subject }}</span>
             <p class="text-display-xs text-ink text-center font-normal leading-relaxed">{{ currentCard.front }}</p>
             <span class="text-mute text-xs mt-6">点击翻转</span>
           </div>
@@ -113,9 +113,9 @@ const reviewCard = async (remembered: boolean) => {
     <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" @click.self="showCreate = false">
       <div class="card-xai w-full max-w-[440px] mx-4 space-y-4">
         <p class="eyebrow-mono-sm text-mute">新建闪卡</p>
-        <div><label class="block text-body text-sm mb-2">正面（问题）</label><input v-model="newFront" type="text" placeholder="输入问题..." class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" /></div>
-        <div><label class="block text-body text-sm mb-2">背面（答案）</label><input v-model="newBack" type="text" placeholder="输入答案..." class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" /></div>
-        <div><label class="block text-body text-sm mb-2">学科（可选）</label><input v-model="newSubject" type="text" placeholder="如：政治" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" /></div>
+        <div><label class="block text-body text-sm mb-2">正面（问题）</label><input v-model="newFront" type="text" placeholder="输入问题..." class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" /></div>
+        <div><label class="block text-body text-sm mb-2">背面（答案）</label><input v-model="newBack" type="text" placeholder="输入答案..." class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" /></div>
+        <div><label class="block text-body text-sm mb-2">学科（可选）</label><input v-model="newSubject" type="text" placeholder="如：政治" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" /></div>
         <div class="flex gap-3 pt-2">
           <button class="btn-pill-outline cursor-target flex-1 text-sm" @click="showCreate = false">取消</button>
           <button class="btn-pill-filled cursor-target flex-1 text-sm" :disabled="creating" @click="createCard">{{ creating ? '创建中...' : '创建' }}</button>

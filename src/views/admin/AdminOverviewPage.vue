@@ -32,7 +32,7 @@ onMounted(async () => {
       <div class="card-xai">
         <p class="eyebrow-mono-sm text-mute mb-4">科目分布</p>
         <div class="space-y-2">
-          <div v-for="(count, subject) in stats.subjects" :key="subject" class="flex items-center justify-between py-2 border-b border-hairline last:border-b-0">
+          <div v-for="(count, subject) in stats.subjects" :key="subject" class="flex items-center justify-between py-2 border-b-4 border-dashed border-hairline last:border-b-0">
             <span class="text-body text-sm">{{ subject }}</span>
             <span class="text-mute text-sm">{{ count }} 题</span>
           </div>

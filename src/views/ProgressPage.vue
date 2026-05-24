@@ -238,13 +238,13 @@ const renderMarkdown = (text: string) => {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-body text-xs mb-1">计划天数</label>
-              <select v-model.number="studyPlanForm.days" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+              <select v-model.number="studyPlanForm.days" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
                 <option v-for="d in [3, 5, 7, 10, 14, 21, 30]" :key="d" :value="d">{{ d }} 天</option>
               </select>
             </div>
             <div>
               <label class="block text-body text-xs mb-1">每日学习时间</label>
-              <select v-model.number="studyPlanForm.daily_minutes" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+              <select v-model.number="studyPlanForm.daily_minutes" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
                 <option :value="30">30 分钟</option>
                 <option :value="60">1 小时</option>
                 <option :value="90">1.5 小时</option>
@@ -256,9 +256,9 @@ const renderMarkdown = (text: string) => {
           </div>
           <div>
             <label class="block text-body text-xs mb-1">重点学科（可选，逗号分隔）</label>
-            <input v-model="studyPlanForm.target_subjects" placeholder="如：政治, 英语" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+            <input v-model="studyPlanForm.target_subjects" placeholder="如：政治, 英语" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
           </div>
-          <div class="bg-canvas-soft border border-hairline rounded-card p-3 text-xs text-mute space-y-1">
+          <div class="bg-canvas-soft border-4 border-dashed border-hairline rounded-card p-3 text-xs text-mute space-y-1">
             <p>AI 将基于你的错题记录、正确率趋势和薄弱章节，生成包含以下内容的学习计划：</p>
             <p>每日学习重点 + 具体任务 + 复习安排 + 预估提升空间</p>
           </div>
@@ -277,14 +277,14 @@ const renderMarkdown = (text: string) => {
 
         <!-- Plan Result -->
         <div v-if="studyPlanData && !studyPlanLoading" class="space-y-4">
-          <div v-if="studyPlanData.summary" class="bg-canvas-soft border border-hairline rounded-card p-4">
+          <div v-if="studyPlanData.summary" class="bg-canvas-soft border-4 border-dashed border-hairline rounded-card p-4">
             <p class="text-ink text-sm font-bold mb-1">规划概述</p>
             <p class="text-body text-sm">{{ studyPlanData.summary }}</p>
             <p v-if="studyPlanData.estimated_accuracy_gain" class="text-mute text-xs mt-2">预估正确率提升：{{ studyPlanData.estimated_accuracy_gain }}</p>
           </div>
 
           <div class="space-y-3">
-            <div v-for="day in studyPlanData.plan" :key="day.day" class="border border-hairline rounded-card p-4 space-y-3">
+            <div v-for="day in studyPlanData.plan" :key="day.day" class="border-4 border-dashed border-hairline rounded-card p-4 space-y-3">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ink text-canvas text-xs font-bold">D{{ day.day }}</span>
@@ -306,7 +306,7 @@ const renderMarkdown = (text: string) => {
               <div v-if="day.review_topics && day.review_topics.length > 0">
                 <p class="text-mute text-xs mb-1.5">复习要点</p>
                 <div class="flex flex-wrap gap-1.5">
-                  <span v-for="(topic, ti) in day.review_topics" :key="ti" class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ topic }}</span>
+                  <span v-for="(topic, ti) in day.review_topics" :key="ti" class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute">{{ topic }}</span>
                 </div>
               </div>
             </div>

@@ -110,7 +110,7 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
     </div>
 
     <!-- Tabs -->
-    <div class="flex gap-4 border-b border-hairline pb-0">
+    <div class="flex gap-4 border-b-4 border-dashed border-hairline pb-0">
       <button class="pb-3 text-sm border-b-2 transition-colors -mb-[1px]"
         :class="activeTab === 'resources' ? 'border-ink text-ink' : 'border-transparent text-mute hover:text-body'"
         @click="activeTab = 'resources'">资源库</button>
@@ -123,12 +123,12 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
     <template v-if="activeTab === 'resources'">
       <div class="flex flex-col sm:flex-row gap-3">
         <input v-model="search" type="text" placeholder="搜索资源..."
-          class="flex-1 bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors" />
-        <select v-model="selectedSubject" class="bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm">
+          class="flex-1 bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors" />
+        <select v-model="selectedSubject" class="bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm">
           <option value="all">全部学科</option>
           <option v-for="s in subjects" :key="s" :value="s">{{ s }}</option>
         </select>
-        <select v-model="selectedType" class="bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm">
+        <select v-model="selectedType" class="bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm">
           <option value="all">全部类型</option>
           <option v-for="t in types" :key="t" :value="t">{{ t }}</option>
         </select>
@@ -142,12 +142,12 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="r in resources" :key="r.id" class="card-xai flex flex-col gap-3 group cursor-target hover:border-canvas-mid transition-colors">
           <div class="flex items-start justify-between">
-            <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ r.type }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute">{{ r.type }}</span>
             <span class="text-mute text-xs">{{ r.year }}</span>
           </div>
           <h3 class="text-ink text-base font-normal leading-snug">{{ r.title }}</h3>
           <p v-if="r.description" class="text-mute text-xs leading-relaxed line-clamp-2">{{ r.description }}</p>
-          <div class="flex items-center justify-between mt-auto pt-2 border-t border-hairline">
+          <div class="flex items-center justify-between mt-auto pt-2 border-t-4 border-dashed border-hairline">
             <span class="text-mute text-xs">{{ formatSize(r.size) }}</span>
             <span class="text-mute text-xs">{{ r.downloads.toLocaleString() }} 次下载</span>
           </div>
@@ -166,7 +166,7 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('zh-CN')
         <div v-for="m in mistakes" :key="m.id" class="card-xai flex items-start justify-between gap-4 group">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ m.question_subject }}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute">{{ m.question_subject }}</span>
               <span class="text-xs text-mute">错 {{ m.wrong_count }} 次</span>
               <span v-if="m.review_count" class="text-xs text-mute">复习 {{ m.review_count }} 次</span>
               <span class="text-xs text-mute">下次复习: {{ formatDate(m.next_review_at) }}</span>

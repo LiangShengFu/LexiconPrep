@@ -25,8 +25,8 @@ const isActive = (path: string) => route.path === path
         :chromatic-aberration="0" :dither="0" :curvature="0" tint="#ffffff"
         :mouse-react="false" :page-load-animation="true" :brightness="0.6" />
     </div>
-    <aside class="w-56 flex-shrink-0 border-r border-hairline bg-canvas flex flex-col">
-      <button class="h-14 flex items-center px-6 text-ink text-sm font-normal tracking-tight border-b border-hairline" @click="router.push('/admin')">
+    <aside class="w-56 flex-shrink-0 border-r-4 border-dashed border-hairline bg-canvas flex flex-col">
+      <button class="h-14 flex items-center px-6 text-ink text-sm font-normal tracking-tight border-b-4 border-dashed border-hairline" @click="router.push('/admin')">
         管理后台
       </button>
       <nav class="flex-1 py-4 space-y-1 px-3">
@@ -40,7 +40,7 @@ const isActive = (path: string) => route.path === path
           {{ item.label }}
         </button>
       </nav>
-      <div class="p-3 border-t border-hairline space-y-2">
+      <div class="p-3 border-t-4 border-dashed border-hairline space-y-2">
         <button class="btn-pill-outline cursor-target text-sm w-full" @click="router.push('/profile')">返回前台</button>
         <button class="btn-pill-outline cursor-target text-sm w-full" @click="auth.logout(); router.push('/')">退出</button>
       </div>

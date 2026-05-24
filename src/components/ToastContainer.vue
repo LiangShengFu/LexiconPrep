@@ -13,7 +13,7 @@ const ui = useUiStore()
       :class="{
         'border-green-500/30': toast.type === 'success',
         'border-red-500/30': toast.type === 'error',
-        'border-hairline': toast.type === 'info',
+        'border-4 border-dashed border-hairline': toast.type === 'info',
       }"
       @click="ui.removeToast(toast.id)"
     >

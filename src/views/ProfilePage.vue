@@ -139,10 +139,10 @@ const checkIn = async () => {
       <!-- Avatar + Check-in -->
       <div class="card-xai space-y-4 flex flex-col items-center text-center">
         <label class="cursor-target relative group">
-          <div v-if="avatar" class="w-24 h-24 rounded-full border-2 border-hairline overflow-hidden">
+          <div v-if="avatar" class="w-24 h-24 rounded-full border-4 border-dashed border-hairline overflow-hidden">
             <img :src="avatar" class="w-full h-full object-cover" />
           </div>
-          <div v-else class="w-24 h-24 rounded-full bg-canvas-soft border-2 border-hairline flex items-center justify-center text-3xl text-mute">
+          <div v-else class="w-24 h-24 rounded-full bg-canvas-soft border-4 border-dashed border-hairline flex items-center justify-center text-3xl text-mute">
             {{ nickname?.[0] || '?' }}
           </div>
           <div class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -190,11 +190,11 @@ const checkIn = async () => {
         <p class="eyebrow-mono-sm text-mute">个人信息</p>
         <div>
           <label class="block text-body text-sm mb-2">昵称</label>
-          <input v-model="nickname" type="text" placeholder="你的昵称" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <input v-model="nickname" type="text" placeholder="你的昵称" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div>
           <label class="block text-body text-sm mb-2">邮箱</label>
-          <input :value="email" type="email" disabled class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-mute text-sm opacity-60 cursor-not-allowed" />
+          <input :value="email" type="email" disabled class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-mute text-sm opacity-60 cursor-not-allowed" />
         </div>
         <button class="btn-pill-filled cursor-target text-sm px-6 py-2.5" :disabled="profileSaving" @click="saveProfile">{{ profileSaving ? '保存中...' : '保存' }}</button>
       </div>
@@ -203,11 +203,11 @@ const checkIn = async () => {
         <p class="eyebrow-mono-sm text-mute">修改密码</p>
         <div>
           <label class="block text-body text-sm mb-2">当前密码</label>
-          <input v-model="currentPassword" type="password" placeholder="输入当前密码" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <input v-model="currentPassword" type="password" placeholder="输入当前密码" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div>
           <label class="block text-body text-sm mb-2">新密码</label>
-          <input v-model="newPassword" type="password" placeholder="至少6位" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <input v-model="newPassword" type="password" placeholder="至少6位" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
           <div v-if="newPassword" class="flex items-center gap-2 mt-2">
             <div class="flex-1 h-1 bg-canvas-soft rounded-full overflow-hidden">
               <div class="h-full rounded-full transition-all duration-300" :style="{ width: passwordStrength.level * 25 + '%', backgroundColor: passwordStrength.color }" />
@@ -217,7 +217,7 @@ const checkIn = async () => {
         </div>
         <div>
           <label class="block text-body text-sm mb-2">确认新密码</label>
-          <input v-model="confirmPassword" type="password" placeholder="再次输入" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <input v-model="confirmPassword" type="password" placeholder="再次输入" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <button class="btn-pill-filled cursor-target text-sm px-6 py-2.5" :disabled="passwordSaving" @click="changePassword">{{ passwordSaving ? '修改中...' : '修改密码' }}</button>
       </div>

@@ -44,10 +44,10 @@ const navigateTo = (path: string) => { router.push(path); sidebarOpen.value = fa
     <div v-if="sidebarOpen" class="fixed inset-0 bg-black/50 z-30 md:hidden" @click="sidebarOpen = false" />
 
     <!-- Sidebar -->
-    <aside class="w-56 flex-shrink-0 border-r border-hairline bg-canvas flex-col fixed md:relative inset-y-0 left-0 z-40 transition-transform md:translate-x-0"
+    <aside class="w-56 flex-shrink-0 border-r-4 border-dashed border-hairline bg-canvas flex-col fixed md:relative inset-y-0 left-0 z-40 transition-transform md:translate-x-0"
       :class="sidebarOpen ? 'translate-x-0 flex' : '-translate-x-full md:flex'">
       <button
-        class="h-14 flex items-center px-6 text-ink text-sm font-normal tracking-tight border-b border-hairline focus:outline-none focus:ring-2 focus:ring-ink"
+        class="h-14 flex items-center px-6 text-ink text-sm font-normal tracking-tight border-b-4 border-dashed border-hairline focus:outline-none focus:ring-2 focus:ring-ink"
         aria-label="首页"
         @click="navigateTo('/')"
       >
@@ -68,7 +68,7 @@ const navigateTo = (path: string) => { router.push(path); sidebarOpen.value = fa
           </el-icon>
           {{ item.label }}
         </button>
-        <div v-if="isAdmin()" class="pt-3 mt-3 border-t border-hairline">
+        <div v-if="isAdmin()" class="pt-3 mt-3 border-t-4 border-dashed border-hairline">
           <button
             class="w-full flex items-center gap-3 px-3 py-2 rounded-card text-sm font-normal transition-colors cursor-target focus:outline-none focus:ring-2 focus:ring-ink"
             :class="route.path.startsWith('/admin') ? 'bg-canvas-soft text-ink' : 'text-body hover:text-ink hover:bg-canvas-soft'"
@@ -81,7 +81,7 @@ const navigateTo = (path: string) => { router.push(path); sidebarOpen.value = fa
         </div>
       </nav>
 
-      <div class="p-3 border-t border-hairline">
+      <div class="p-3 border-t-4 border-dashed border-hairline">
         <button
           class="btn-pill-outline cursor-target text-sm w-full focus:outline-none focus:ring-2 focus:ring-ink"
           aria-label="退出登录"
@@ -95,7 +95,7 @@ const navigateTo = (path: string) => { router.push(path); sidebarOpen.value = fa
     <!-- Main Content -->
     <main class="flex-1 overflow-auto relative z-10">
       <!-- Mobile top bar -->
-      <div class="md:hidden flex items-center justify-between h-14 px-4 border-b border-hairline bg-canvas/80 backdrop-blur-sm sticky top-0 z-20">
+      <div class="md:hidden flex items-center justify-between h-14 px-4 border-b-4 border-dashed border-hairline bg-canvas/80 backdrop-blur-sm sticky top-0 z-20">
         <button class="text-ink focus:outline-none focus:ring-2 focus:ring-ink" aria-label="打开菜单" @click="sidebarOpen = true">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>

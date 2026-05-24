@@ -162,10 +162,10 @@ const getOptionClass = (qId: string, label: string) => {
     if (selected) {
       return fb.correct ? 'border-green-500 text-green-400 bg-green-500/10' : 'border-red-500 text-red-400 bg-red-500/10'
     }
-    return 'border-hairline text-mute opacity-50'
+    return 'border-4 border-dashed border-hairline text-mute opacity-50'
   }
-  if (selected) return 'border-ink text-ink bg-canvas-soft'
-  return 'border-hairline text-body hover:border-canvas-mid'
+  if (selected) return 'border-4 border-dashed border-ink text-ink bg-canvas-soft'
+  return 'border-4 border-dashed border-hairline text-body hover:border-canvas-mid'
 }
 </script>
 
@@ -217,9 +217,9 @@ const getOptionClass = (qId: string, label: string) => {
         <!-- Question Canvas -->
         <div class="lg:col-span-3 card-xai flex flex-col">
           <div class="flex items-center gap-3 mb-6">
-            <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute font-mono uppercase">{{ currentQuestion.type === 'SINGLE' ? '单选' : '多选' }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute font-mono uppercase">{{ currentQuestion.type === 'SINGLE' ? '单选' : '多选' }}</span>
             <span class="text-mute text-sm">第 {{ currentIndex + 1 }} 题 / 共 {{ totalQuestions }} 题</span>
-            <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ currentQuestion.subject }} · {{ currentQuestion.chapter }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute">{{ currentQuestion.subject }} · {{ currentQuestion.chapter }}</span>
           </div>
 
           <p class="text-ink text-lg font-normal leading-relaxed mb-8">{{ currentQuestion.content }}</p>
@@ -251,7 +251,7 @@ const getOptionClass = (qId: string, label: string) => {
             <span v-if="feedback[currentQuestion.id].analysis" class="block mt-2 text-body">{{ feedback[currentQuestion.id].analysis }}</span>
           </div>
 
-          <div class="flex items-center justify-between mt-8 pt-4 border-t border-hairline">
+          <div class="flex items-center justify-between mt-8 pt-4 border-t-4 border-dashed border-hairline">
             <button class="btn-pill-outline cursor-target text-sm" :disabled="currentIndex === 0" @click="prevQuestion">上一题</button>
             <button
               v-if="currentIndex < totalQuestions - 1"
@@ -264,7 +264,7 @@ const getOptionClass = (qId: string, label: string) => {
         </div>
 
         <!-- Answer Sheet (floating bottom on mobile, sidebar on desktop) -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 lg:static lg:z-auto rounded-t-2xl lg:rounded-card border-t lg:border border-hairline bg-white dark:bg-gray-900 p-4 lg:p-6 shadow-lg lg:shadow-none transition-transform duration-300 max-h-[60vh] lg:max-h-none overflow-y-auto" :class="sheetOpen ? 'translate-y-0' : 'translate-y-[calc(100%-40px)] lg:translate-y-0'">
+        <div class="fixed bottom-0 left-0 right-0 z-50 lg:static lg:z-auto rounded-t-2xl lg:rounded-card border-t lg:border-4 border-dashed border-hairline bg-white dark:bg-gray-900 p-4 lg:p-6 shadow-lg lg:shadow-none transition-transform duration-300 max-h-[60vh] lg:max-h-none overflow-y-auto" :class="sheetOpen ? 'translate-y-0' : 'translate-y-[calc(100%-40px)] lg:translate-y-0'">
           <div class="flex items-center justify-center lg:hidden mb-2 cursor-pointer" @click="sheetOpen = !sheetOpen">
             <div class="w-10 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
           </div>
@@ -276,17 +276,17 @@ const getOptionClass = (qId: string, label: string) => {
               class="w-10 h-10 rounded-card border text-xs font-mono transition-colors"
               :class="feedback[q.id]
                 ? feedback[q.id].correct ? 'border-green-500 text-green-400 bg-green-500/10' : 'border-red-500 text-red-400 bg-red-500/10'
-                : answers[q.id]?.length ? 'border-ink text-ink bg-canvas-soft' : 'border-hairline text-mute'"
+                : answers[q.id]?.length ? 'border-4 border-dashed border-ink text-ink bg-canvas-soft' : 'border-4 border-dashed border-hairline text-mute'"
               @click="goToQuestion(idx)"
             >
               {{ idx + 1 }}
             </button>
           </div>
-          <div class="mt-6 pt-4 border-t border-hairline space-y-2 text-xs text-mute">
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm border border-ink bg-canvas-soft" /> 已答</div>
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm border border-hairline" /> 未答</div>
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-green-500/20 border border-green-500" /> 正确</div>
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-red-500/20 border border-red-500" /> 错误</div>
+          <div class="mt-6 pt-4 border-t-4 border-dashed border-hairline space-y-2 text-xs text-mute">
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm border border-dashed border-ink bg-canvas-soft" /> 已答</div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm border-4 border-dashed border-hairline" /> 未答</div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-green-500/20 border-4 border-dashed border-green-500" /> 正确</div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-red-500/20 border-4 border-dashed border-red-500" /> 错误</div>
           </div>
         </div>
       </div>

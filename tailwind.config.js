@@ -5,11 +5,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: '#0a0a0a',
-        'canvas-soft': '#1a1c20',
-        'canvas-card': '#191919',
+        canvas: '#000000',
+        'canvas-soft': '#000000',
+        'canvas-card': '#000000',
         'canvas-mid': '#363a3f',
-        hairline: '#212327',
+        hairline: '#ffffff',
         ink: '#ffffff',
         'ink-hover': '#fafaf7',
         body: '#dadbdf',

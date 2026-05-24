@@ -55,7 +55,7 @@ const handleLogin = async () => {
             v-model="email"
             type="email"
             placeholder="请输入邮箱地址"
-            class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors"
+            class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors"
             @keyup.enter="handleLogin"
           />
         </div>
@@ -65,7 +65,7 @@ const handleLogin = async () => {
             v-model="password"
             type="password"
             placeholder="请输入密码"
-            class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors"
+            class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink transition-colors"
             @keyup.enter="handleLogin"
           />
         </div>

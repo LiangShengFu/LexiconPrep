@@ -165,8 +165,8 @@ const generateAiQuestions = async () => {
     </div>
 
     <div class="flex gap-3">
-      <input v-model="search" placeholder="搜索题目..." class="flex-1 bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" @keyup.enter="load" />
-      <select v-model="filterSubject" class="bg-canvas-soft border border-hairline rounded-card px-4 py-2.5 text-ink text-sm" @change="load">
+      <input v-model="search" placeholder="搜索题目..." class="flex-1 bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" @keyup.enter="load" />
+      <select v-model="filterSubject" class="bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2.5 text-ink text-sm" @change="load">
         <option value="">全部学科</option>
         <option value="政治">政治</option>
         <option value="英语">英语</option>
@@ -185,8 +185,8 @@ const generateAiQuestions = async () => {
         <input v-if="batchMode" type="checkbox" :checked="selectedIds.has(q.id)" class="cursor-target mt-0.5 shrink-0" @change="toggleSelect(q.id)" />
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ q.subject }}</span>
-            <span class="text-xs px-2 py-0.5 rounded-full border border-hairline text-mute">{{ q.type === 'SINGLE' ? '单选' : '多选' }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute">{{ q.subject }}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full border-4 border-dashed border-hairline text-mute">{{ q.type === 'SINGLE' ? '单选' : '多选' }}</span>
             <span class="text-xs text-mute">难度 {{ q.difficulty }}</span>
           </div>
           <p class="text-body text-sm truncate">{{ q.content }}</p>
@@ -205,14 +205,14 @@ const generateAiQuestions = async () => {
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block text-body text-xs mb-1">题型</label>
-            <select v-model="form.type" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model="form.type" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option value="SINGLE">单选</option>
               <option value="MULTIPLE">多选</option>
             </select>
           </div>
           <div>
             <label class="block text-body text-xs mb-1">学科</label>
-            <select v-model="form.subject" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model="form.subject" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option value="政治">政治</option>
               <option value="英语">英语</option>
               <option value="数学">数学</option>
@@ -220,33 +220,33 @@ const generateAiQuestions = async () => {
           </div>
           <div>
             <label class="block text-body text-xs mb-1">难度</label>
-            <select v-model.number="form.difficulty" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model.number="form.difficulty" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option v-for="d in 5" :key="d" :value="d">{{ d }}</option>
             </select>
           </div>
         </div>
         <div>
           <label class="block text-body text-xs mb-1">章节</label>
-          <input v-model="form.chapter" placeholder="如：马克思主义哲学" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <input v-model="form.chapter" placeholder="如：马克思主义哲学" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div>
           <label class="block text-body text-xs mb-1">题目内容</label>
-          <textarea v-model="form.content" rows="3" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <textarea v-model="form.content" rows="3" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div>
           <label class="block text-body text-xs mb-1">选项（{{ form.type === 'SINGLE' ? '单选' : '多选' }}）</label>
           <div v-for="(_, i) in 4" :key="i" class="flex items-center gap-2 mb-1">
             <span class="text-mute text-xs w-5">{{ String.fromCharCode(65 + i) }}</span>
-            <input v-model="form.options[i]" :placeholder="`选项 ${String.fromCharCode(65 + i)}`" class="flex-1 bg-canvas-soft border border-hairline rounded-card px-3 py-1.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+            <input v-model="form.options[i]" :placeholder="`选项 ${String.fromCharCode(65 + i)}`" class="flex-1 bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-1.5 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
           </div>
         </div>
         <div>
           <label class="block text-body text-xs mb-1">正确答案（填入选项字母，如 {{ form.type === 'SINGLE' ? 'A' : 'A, B, C' }}）</label>
-          <input v-model="form.answer[0]" placeholder="用逗号分隔，如 A,B" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" @change="form.answer = form.answer[0]?.split(',').map(s => s.trim()).filter(Boolean) || []" />
+          <input v-model="form.answer[0]" placeholder="用逗号分隔，如 A,B" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" @change="form.answer = form.answer[0]?.split(',').map(s => s.trim()).filter(Boolean) || []" />
         </div>
         <div>
           <label class="block text-body text-xs mb-1">答案解析（可选）</label>
-          <textarea v-model="form.analysis" rows="2" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <textarea v-model="form.analysis" rows="2" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
         <div class="flex gap-3 pt-2">
           <button class="btn-pill-outline cursor-target flex-1 text-sm" @click="showEdit = false">取消</button>
@@ -266,7 +266,7 @@ const generateAiQuestions = async () => {
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-body text-xs mb-1">学科</label>
-            <select v-model="aiForm.subject" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model="aiForm.subject" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option value="政治">政治</option>
               <option value="英语">英语</option>
               <option value="数学">数学</option>
@@ -274,14 +274,14 @@ const generateAiQuestions = async () => {
           </div>
           <div>
             <label class="block text-body text-xs mb-1">题型</label>
-            <select v-model="aiForm.type" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model="aiForm.type" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option value="SINGLE">单选题</option>
               <option value="MULTIPLE">多选题</option>
             </select>
           </div>
           <div>
             <label class="block text-body text-xs mb-1">难度</label>
-            <select v-model.number="aiForm.difficulty" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model.number="aiForm.difficulty" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option :value="1">1 - 基础</option>
               <option :value="2">2 - 中等</option>
               <option :value="3">3 - 较难</option>
@@ -291,7 +291,7 @@ const generateAiQuestions = async () => {
           </div>
           <div>
             <label class="block text-body text-xs mb-1">数量</label>
-            <select v-model.number="aiForm.count" class="w-full bg-canvas-soft border border-hairline rounded-card px-3 py-2 text-ink text-sm">
+            <select v-model.number="aiForm.count" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-3 py-2 text-ink text-sm">
               <option v-for="n in [3, 5, 10, 15, 20]" :key="n" :value="n">{{ n }} 道</option>
             </select>
           </div>
@@ -299,10 +299,10 @@ const generateAiQuestions = async () => {
 
         <div>
           <label class="block text-body text-xs mb-1">章节（可选，留空则随机覆盖）</label>
-          <input v-model="aiForm.chapter" placeholder="如：马克思主义哲学、词汇、导数与微分" class="w-full bg-canvas-soft border border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
+          <input v-model="aiForm.chapter" placeholder="如：马克思主义哲学、词汇、导数与微分" class="w-full bg-canvas-soft border-4 border-dashed border-hairline rounded-card px-4 py-2 text-ink text-sm placeholder:text-mute focus:outline-none focus:border-ink" />
         </div>
 
-        <div class="bg-canvas-soft border border-hairline rounded-card p-3 text-xs text-mute space-y-1">
+        <div class="bg-canvas-soft border-4 border-dashed border-hairline rounded-card p-3 text-xs text-mute space-y-1">
           <p>AI 将基于 DeepSeek 大模型自动生成符合考研大纲的题目，每道题包含：</p>
           <p>题干 + 4个选项 + 正确答案 + 详细解析</p>
           <p>生成后自动入库，可在列表中编辑或删除。</p>

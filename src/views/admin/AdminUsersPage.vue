@@ -61,7 +61,7 @@ const resetPassword = async (user: User) => {
       <div v-for="u in users" :key="u.id">
         <div class="card-xai flex items-center justify-between gap-4 cursor-pointer" @click="toggleExpand(u.id)">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-canvas-soft border border-hairline flex items-center justify-center overflow-hidden shrink-0">
+            <div class="w-10 h-10 rounded-full bg-canvas-soft border-4 border-dashed border-hairline flex items-center justify-center overflow-hidden shrink-0">
               <img v-if="u.avatar" :src="u.avatar" class="w-full h-full object-cover" />
               <span v-else class="text-mute text-xs font-mono">{{ u.nickname?.charAt(0) || '?' }}</span>
             </div>
@@ -73,7 +73,7 @@ const resetPassword = async (user: User) => {
           <div class="flex items-center gap-3">
             <span class="text-mute text-xs">打卡 {{ u.streak_days }} 天</span>
             <span class="text-xs px-2 py-0.5 rounded-full border text-xs"
-              :class="u.role === 'admin' ? 'border-accent-sunset/30 text-accent-sunset' : 'border-hairline text-mute'">
+              :class="u.role === 'admin' ? 'border-4 border-dashed border-accent-sunset/30 text-accent-sunset' : 'border-4 border-dashed border-hairline text-mute'">
               {{ u.role === 'admin' ? '管理员' : '用户' }}
             </span>
             <button class="btn-pill-outline cursor-target text-xs" @click.stop="toggleRole(u)">切换角色</button>
@@ -113,12 +113,12 @@ const resetPassword = async (user: User) => {
             <div>
               <span class="text-mute text-xs">头像</span>
               <div class="mt-1">
-                <img v-if="u.avatar" :src="u.avatar" class="w-16 h-16 rounded-card border border-hairline object-cover" />
+                <img v-if="u.avatar" :src="u.avatar" class="w-16 h-16 rounded-card border-4 border-dashed border-hairline object-cover" />
                 <span v-else class="text-mute text-xs">未设置</span>
               </div>
             </div>
           </div>
-          <div class="border-t border-hairline pt-3">
+          <div class="border-t-4 border-dashed border-hairline pt-3">
             <button class="btn-pill-outline cursor-target text-xs border-amber-500/30 text-amber-400 hover:border-amber-500" @click="resetPassword(u)">重置密码</button>
             <span class="text-mute text-xs ml-3">密码已加密存储，只能重置不能查看</span>
           </div>

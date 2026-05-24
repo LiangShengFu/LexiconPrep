@@ -26,7 +26,7 @@ const logout = () => {
 </script>
 
 <template>
-  <header class="fixed top-0 left-0 right-0 z-50 bg-canvas/80 backdrop-blur-sm border-b border-hairline">
+  <header class="fixed top-0 left-0 right-0 z-50 bg-canvas/80 backdrop-blur-sm border-b-4 border-dashed border-hairline">
     <div class="max-w-[1200px] mx-auto flex items-center justify-between h-14 px-6">
       <button class="text-ink text-sm font-normal tracking-tight hover:text-body transition-colors focus:outline-none focus:ring-2 focus:ring-ink" aria-label="首页" @click="goTo('/')">
         LexiconPrep
@@ -54,15 +54,15 @@ const logout = () => {
     </div>
 
     <!-- Mobile menu -->
-    <div v-if="mobileMenuOpen" class="md:hidden border-t border-hairline bg-canvas px-6 py-4 space-y-3">
+    <div v-if="mobileMenuOpen" class="md:hidden border-t-4 border-dashed border-hairline bg-canvas px-6 py-4 space-y-3">
       <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="goTo('/library')">资源库</button>
       <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="goTo('/flashcards')">闪卡</button>
       <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="goTo('/community')">社区</button>
-      <div class="pt-3 border-t border-hairline space-y-2" v-if="loggedIn">
+      <div class="pt-3 border-t-4 border-dashed border-hairline space-y-2" v-if="loggedIn">
         <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="goTo('/profile')">个人主页</button>
         <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="logout">退出</button>
       </div>
-      <div class="pt-3 border-t border-hairline space-y-2" v-else>
+      <div class="pt-3 border-t-4 border-dashed border-hairline space-y-2" v-else>
         <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="goTo('/login')">登录</button>
         <button class="block w-full text-left text-body text-sm py-2 hover:text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink" @click="goTo('/register')">注册</button>
       </div>

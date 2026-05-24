@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import FaultyTerminal from '@/components/FaultyTerminal.vue'
 
@@ -10,41 +10,205 @@ const savedBreak = parseInt(localStorage.getItem('pomodoro_break') || '5')
 const workMinutes = ref(savedWork)
 const breakMinutes = ref(savedBreak)
 const isWork = ref(true)
-const minutes = ref(savedWork)
-const seconds = ref(0)
 const running = ref(false)
 const showSettings = ref(false)
 const settingWork = ref(savedWork)
 const settingBreak = ref(savedBreak)
+
+const totalMs = computed(() => (isWork.value ? workMinutes.value : breakMinutes.value) * 60 * 1000)
+const remainMs = ref(totalMs.value)
+let startStamp = 0
+let remainAtStart = 0
 let timer: ReturnType<typeof setInterval> | null = null
 
-const totalSeconds = computed(() => (isWork.value ? workMinutes.value : breakMinutes.value) * 60)
-const elapsed = computed(() => totalSeconds.value - (minutes.value * 60 + seconds.value))
-const progress = computed(() => (elapsed.value / totalSeconds.value) * 100)
-const display = computed(() => `${String(minutes.value).padStart(2, '0')}:${String(seconds.value).padStart(2, '0')}`)
+const elapsed = computed(() => totalMs.value - remainMs.value)
+const progress = computed(() => (elapsed.value / totalMs.value) * 100)
+const display = computed(() => {
+  const ms = Math.max(0, remainMs.value)
+  const m = Math.floor(ms / 60000)
+  const s = Math.floor((ms % 60000) / 1000)
+  const cs = Math.floor((ms % 1000) / 10)
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
+})
 const label = computed(() => isWork.value ? '专注' : '休息')
-const radius = 180
-const circumference = 2 * Math.PI * radius
 
 const tick = () => {
-  if (seconds.value === 0) {
-    if (minutes.value === 0) { clearInterval(timer!); timer = null; running.value = false; switchMode(); return }
-    minutes.value--; seconds.value = 59
-  } else { seconds.value-- }
+  const now = Date.now()
+  remainMs.value = Math.max(0, remainAtStart - (now - startStamp))
+  if (remainMs.value <= 0) {
+    clearInterval(timer!); timer = null; running.value = false; switchMode()
+  }
 }
-const start = () => { if (running.value) return; running.value = true; timer = setInterval(tick, 1000) }
-const pause = () => { running.value = false; if (timer) { clearInterval(timer); timer = null } }
-const reset = () => { pause(); minutes.value = isWork.value ? workMinutes.value : breakMinutes.value; seconds.value = 0 }
-const switchMode = () => { isWork.value = !isWork.value; minutes.value = isWork.value ? workMinutes.value : breakMinutes.value; seconds.value = 0; running.value = false; if (timer) { clearInterval(timer); timer = null } }
+const start = () => {
+  if (running.value) return
+  running.value = true
+  startStamp = Date.now()
+  remainAtStart = remainMs.value
+  timer = setInterval(tick, 16)
+}
+const pause = () => {
+  running.value = false
+  if (timer) { clearInterval(timer); timer = null }
+}
+const reset = () => {
+  pause()
+  remainMs.value = totalMs.value
+}
+const switchMode = () => {
+  isWork.value = !isWork.value
+  remainMs.value = totalMs.value
+  running.value = false
+  if (timer) { clearInterval(timer); timer = null }
+}
 const saveSettings = () => {
   workMinutes.value = settingWork.value; breakMinutes.value = settingBreak.value
   localStorage.setItem('pomodoro_work', String(settingWork.value))
   localStorage.setItem('pomodoro_break', String(settingBreak.value))
-  if (!running.value) { minutes.value = isWork.value ? workMinutes.value : breakMinutes.value; seconds.value = 0 }
+  if (!running.value) { remainMs.value = totalMs.value }
   showSettings.value = false
 }
 
-onUnmounted(() => { if (timer) clearInterval(timer) })
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+let animFrame = 0
+let orbitTick = 0
+
+function isDark() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+function drawArc(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, startAngle: number, endAngle: number, color: string, lw: number, dash: number[] = []) {
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, startAngle, endAngle)
+  ctx.strokeStyle = color
+  ctx.lineWidth = lw
+  ctx.setLineDash(dash)
+  ctx.stroke()
+  ctx.restore()
+}
+
+function drawTick(ctx: CanvasRenderingContext2D, cx: number, cy: number, r1: number, r2: number, angle: number, color: string, lw: number) {
+  ctx.save()
+  ctx.beginPath()
+  ctx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1)
+  ctx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2)
+  ctx.strokeStyle = color
+  ctx.lineWidth = lw
+  ctx.stroke()
+  ctx.restore()
+}
+
+function drawCanvas() {
+  const canvas = canvasRef.value
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  const W = 400, H = 400, CX = W / 2, CY = H / 2
+  const dark = isDark()
+
+  const accent1 = isWork.value ? (dark ? '#F0997B' : '#993C1D') : (dark ? '#5DCAA5' : '#0F6E56')
+  const faint1 = isWork.value
+    ? (dark ? 'rgba(240,153,123,0.12)' : 'rgba(153,60,29,0.08)')
+    : (dark ? 'rgba(93,202,165,0.12)' : 'rgba(15,110,86,0.08)')
+  const accent2 = dark ? '#AFA9EC' : '#534AB7'
+  const faint2 = dark ? 'rgba(175,169,236,0.12)' : 'rgba(83,74,183,0.08)'
+
+  ctx.clearRect(0, 0, W, H)
+
+  const RAD = -Math.PI / 2
+  const prog = progress.value / 100
+
+  for (let i = 0; i < 60; i++) {
+    const a = RAD + (i / 60) * Math.PI * 2
+    const isMaj = i % 5 === 0
+    const r1 = isMaj ? 175 : 179
+    const r2 = 185
+    drawTick(ctx, CX, CY, r1, r2, a, isMaj ? accent2 : (dark ? 'rgba(175,169,236,0.35)' : 'rgba(83,74,183,0.25)'), isMaj ? 1.5 : 0.75)
+  }
+
+  drawArc(ctx, CX, CY, 165, 0, Math.PI * 2, faint1, 6)
+  const progAngle = RAD + prog * Math.PI * 2
+  drawArc(ctx, CX, CY, 165, RAD, progAngle, accent1, 6)
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(CX + Math.cos(progAngle) * 165, CY + Math.sin(progAngle) * 165, 5, 0, Math.PI * 2)
+  ctx.fillStyle = accent1
+  ctx.fill()
+  ctx.restore()
+
+  drawArc(ctx, CX, CY, 148, 0, Math.PI * 2, faint2, 4)
+  const secFrac = (remainMs.value / 1000) % 60 / 60
+  const secAngle = RAD + secFrac * Math.PI * 2
+  drawArc(ctx, CX, CY, 148, RAD, secAngle, accent2, 4)
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(CX + Math.cos(secAngle) * 148, CY + Math.sin(secAngle) * 148, 3.5, 0, Math.PI * 2)
+  ctx.fillStyle = accent2
+  ctx.fill()
+  ctx.restore()
+
+  drawArc(ctx, CX, CY, 132, 0, Math.PI * 2, dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', 0.75, [4, 6])
+
+  ctx.save()
+  ctx.font = '500 10px monospace'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillStyle = dark ? '#aaa' : '#666'
+  const totalMin = isWork.value ? workMinutes.value : breakMinutes.value
+  for (let i = 0; i <= 12; i++) {
+    const a = RAD + (i / 12) * Math.PI * 2
+    const tx = CX + Math.cos(a) * 118
+    const ty = CY + Math.sin(a) * 118
+    const label = Math.round((i / 12) * totalMin)
+    ctx.fillText(String(label).padStart(2, '0'), tx, ty)
+  }
+  ctx.restore()
+
+  const crossSize = 10
+  ctx.save()
+  ctx.strokeStyle = dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)'
+  ctx.lineWidth = 0.75
+  ctx.beginPath(); ctx.moveTo(CX - crossSize, CY); ctx.lineTo(CX + crossSize, CY); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(CX, CY - crossSize); ctx.lineTo(CX, CY + crossSize); ctx.stroke()
+  ctx.restore()
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(CX, CY, 3, 0, Math.PI * 2)
+  ctx.fillStyle = dark ? '#aaa' : '#666'
+  ctx.fill()
+  ctx.restore()
+
+  const orbitAngle = (orbitTick * 0.3) % 360
+  const oRad = orbitAngle * Math.PI / 180
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(CX, CY, 192, oRad, oRad + Math.PI * 0.25)
+  ctx.strokeStyle = dark ? 'rgba(175,169,236,0.25)' : 'rgba(83,74,183,0.15)'
+  ctx.lineWidth = 1
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.arc(CX, CY, 192, oRad + Math.PI, oRad + Math.PI * 1.25)
+  ctx.stroke()
+  ctx.restore()
+
+  orbitTick++
+  animFrame = requestAnimationFrame(drawCanvas)
+}
+
+onMounted(() => {
+  nextTick(() => { drawCanvas() })
+})
+
+watch([progress, isWork], () => {})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+  if (animFrame) cancelAnimationFrame(animFrame)
+})
 </script>
 
 <template>
@@ -61,14 +225,10 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 
       <p class="eyebrow-mono mb-6">{{ isWork ? '专注模式' : '休息时间' }}</p>
       <div class="relative max-w-[400px] w-full aspect-square">
-        <svg class="w-full h-full -rotate-90" viewBox="0 0 400 400">
-          <circle cx="200" cy="200" :r="radius" fill="none" stroke="#212327" stroke-width="6" />
-          <circle cx="200" cy="200" :r="radius" fill="none" :stroke="isWork ? '#ff7a17' : '#50e3c2'" stroke-width="6" stroke-linecap="round"
-            :stroke-dasharray="circumference" :stroke-dashoffset="circumference * (1 - progress / 100)" class="transition-all duration-1000" />
-        </svg>
+        <canvas ref="canvasRef" width="400" height="400" class="w-full h-full" />
         <div class="absolute inset-0 flex flex-col items-center justify-center" role="timer" :aria-label="label + '模式，剩余' + display" aria-live="polite">
-          <span class="text-[96px] text-ink font-mono tracking-tight leading-none">{{ display }}</span>
-          <span class="text-2xl text-mute mt-2">{{ label }}</span>
+          <span class="text-[56px] text-ink font-mono tracking-tight leading-none">{{ display.slice(0, 5) }}<span class="text-[32px] text-mute">.{{ display.slice(6) }}</span></span>
+          <span class="text-xl text-mute mt-2">{{ label }}</span>
           <span class="text-sm text-mute mt-1">{{ isWork ? workMinutes : breakMinutes }} 分钟</span>
         </div>
       </div>
